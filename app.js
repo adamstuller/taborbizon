@@ -10714,6 +10714,8 @@ var $elm$url$Url$Parser$parse = F2(
 					url.fragment,
 					$elm$core$Basics$identity)));
 	});
+var $author$project$Main$Form = {$: 'Form'};
+var $author$project$Main$Gallery = {$: 'Gallery'};
 var $author$project$Main$Home = {$: 'Home'};
 var $elm$url$Url$Parser$Parser = function (a) {
 	return {$: 'Parser', a: a};
@@ -10762,6 +10764,32 @@ var $elm$url$Url$Parser$oneOf = function (parsers) {
 				parsers);
 		});
 };
+var $elm$url$Url$Parser$s = function (str) {
+	return $elm$url$Url$Parser$Parser(
+		function (_v0) {
+			var visited = _v0.visited;
+			var unvisited = _v0.unvisited;
+			var params = _v0.params;
+			var frag = _v0.frag;
+			var value = _v0.value;
+			if (!unvisited.b) {
+				return _List_Nil;
+			} else {
+				var next = unvisited.a;
+				var rest = unvisited.b;
+				return _Utils_eq(next, str) ? _List_fromArray(
+					[
+						A5(
+						$elm$url$Url$Parser$State,
+						A2($elm$core$List$cons, next, visited),
+						rest,
+						params,
+						frag,
+						value)
+					]) : _List_Nil;
+			}
+		});
+};
 var $elm$url$Url$Parser$top = $elm$url$Url$Parser$Parser(
 	function (state) {
 		return _List_fromArray(
@@ -10770,7 +10798,15 @@ var $elm$url$Url$Parser$top = $elm$url$Url$Parser$Parser(
 var $author$project$Main$parser = $elm$url$Url$Parser$oneOf(
 	_List_fromArray(
 		[
-			A2($elm$url$Url$Parser$map, $author$project$Main$Home, $elm$url$Url$Parser$top)
+			A2($elm$url$Url$Parser$map, $author$project$Main$Home, $elm$url$Url$Parser$top),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Main$Gallery,
+			$elm$url$Url$Parser$s('gallery')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Main$Form,
+			$elm$url$Url$Parser$s('form'))
 		]));
 var $author$project$Main$GotHomeMessage = function (a) {
 	return {$: 'GotHomeMessage', a: a};
@@ -10827,9 +10863,77 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$none;
 };
+var $elm$browser$Browser$Navigation$load = _Browser_load;
+var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
+var $elm$url$Url$addPort = F2(
+	function (maybePort, starter) {
+		if (maybePort.$ === 'Nothing') {
+			return starter;
+		} else {
+			var port_ = maybePort.a;
+			return starter + (':' + $elm$core$String$fromInt(port_));
+		}
+	});
+var $elm$url$Url$addPrefixed = F3(
+	function (prefix, maybeSegment, starter) {
+		if (maybeSegment.$ === 'Nothing') {
+			return starter;
+		} else {
+			var segment = maybeSegment.a;
+			return _Utils_ap(
+				starter,
+				_Utils_ap(prefix, segment));
+		}
+	});
+var $elm$url$Url$toString = function (url) {
+	var http = function () {
+		var _v0 = url.protocol;
+		if (_v0.$ === 'Http') {
+			return 'http://';
+		} else {
+			return 'https://';
+		}
+	}();
+	return A3(
+		$elm$url$Url$addPrefixed,
+		'#',
+		url.fragment,
+		A3(
+			$elm$url$Url$addPrefixed,
+			'?',
+			url.query,
+			_Utils_ap(
+				A2(
+					$elm$url$Url$addPort,
+					url.port_,
+					_Utils_ap(http, url.host)),
+				url.path)));
+};
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		switch (msg.$) {
+			case 'ClickedLink':
+				var urlRequest = msg.a;
+				if (urlRequest.$ === 'External') {
+					var href = urlRequest.a;
+					return _Utils_Tuple2(
+						model,
+						$elm$browser$Browser$Navigation$load(href));
+				} else {
+					var url = urlRequest.a;
+					return _Utils_Tuple2(
+						model,
+						A2(
+							$elm$browser$Browser$Navigation$pushUrl,
+							model.key,
+							$elm$url$Url$toString(url)));
+				}
+			case 'ChangedUrl':
+				var url = msg.a;
+				return A2($author$project$Main$updateUrl, url, model);
+			default:
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		}
 	});
 var $author$project$Asset$camp = $author$project$Asset$image('taborbizon.jpg');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
@@ -11043,6 +11147,7 @@ var $author$project$Home$viewDocuments = function (documents) {
 					]))
 			]));
 };
+var $author$project$Home$formUrl = '/form';
 var $author$project$Home$viewIntro = A2(
 	$elm$html$Html$div,
 	_List_Nil,
@@ -11067,7 +11172,16 @@ var $author$project$Home$viewIntro = A2(
 			_List_Nil,
 			_List_fromArray(
 				[
-					$elm$html$Html$text('PRIHLÁSIŤ')
+					A2(
+					$elm$html$Html$a,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$href($author$project$Home$formUrl)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('PRIHLÁSIŤ')
+						]))
 				]))
 		]));
 var $author$project$Home$viewSubmitOption = A2(
@@ -11087,7 +11201,16 @@ var $author$project$Home$viewSubmitOption = A2(
 			_List_Nil,
 			_List_fromArray(
 				[
-					$elm$html$Html$text('PRIHLÁSIŤ')
+					A2(
+					$elm$html$Html$a,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$href($author$project$Home$formUrl)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('PRIHLÁSIŤ')
+						]))
 				]))
 		]));
 var $author$project$Home$view = function (model) {

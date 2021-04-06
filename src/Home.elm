@@ -2,7 +2,8 @@ module Home exposing (Model, Msg, init, update, view)
 
 import Asset
 import Html exposing (Html, a, button, div, h1, h2, img, li, p, table, td, text, th, tr, ul)
-import Html.Attributes exposing (download, height)
+import Html.Attributes exposing (download, height, href)
+import Html.Events exposing (onClick)
 
 
 type alias Animator =
@@ -27,6 +28,11 @@ type Msg
     = ClickedSubmitButton
 
 
+formUrl : String
+formUrl =
+    "/form"
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update _ model =
     ( model, Cmd.none )
@@ -37,7 +43,9 @@ viewIntro =
     div []
         [ h1 [] [ text "Tábor Bizón - 2021" ]
         , h2 [] [ text "Putovanie za Betlehemskou hviezdou" ]
-        , button [] [ text "PRIHLÁSIŤ" ]
+        , button []
+            [ a [ href formUrl ] [ text "PRIHLÁSIŤ" ]
+            ]
         ]
 
 
@@ -95,7 +103,9 @@ viewSubmitOption : Html Msg
 viewSubmitOption =
     div []
         [ h2 [] [ text "Prihlásiť sa môžete tu" ]
-        , button [] [ text "PRIHLÁSIŤ" ]
+        , button []
+            [ a [ href formUrl ] [ text "PRIHLÁSIŤ" ]
+            ]
         ]
 
 

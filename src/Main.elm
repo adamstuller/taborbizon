@@ -75,6 +75,17 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        ClickedLink urlRequest ->
+            case urlRequest of
+                Browser.External href ->
+                    ( model, Nav.load href )
+
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl model.key (Url.toString url) )
+
+        ChangedUrl url ->
+            updateUrl url model
+
         _ ->
             ( model, Cmd.none )
 
