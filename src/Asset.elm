@@ -1,4 +1,4 @@
-module Asset exposing (Image, camp, defaultAvatar, src, teamImages)
+module Asset exposing (Asset, camp, defaultAvatar, documentFiles, href, src, teamImages)
 
 {-| Assets, such as images, videos, and audio. (We only have images for now.)
 
@@ -11,13 +11,14 @@ import Html exposing (Attribute)
 import Html.Attributes as Attr
 
 
-type Image
+type Asset
     = Image String
+    | File String
 
 
 type alias TeamImages =
-    { monika : Image
-    , margareta : Image
+    { monika : Asset
+    , margareta : Asset
     }
 
 
@@ -25,6 +26,17 @@ teamImages : TeamImages
 teamImages =
     { monika = image "monula.jpg"
     , margareta = image "meme.jpg"
+    }
+
+
+type alias DocumentFiles =
+    { zdravotnyDotaznik : Asset
+    }
+
+
+documentFiles : DocumentFiles
+documentFiles =
+    { zdravotnyDotaznik = file "dotaznik.pdf"
     }
 
 
@@ -38,25 +50,46 @@ teamImages =
 --     image "loading.svg"
 
 
-camp : Image
+camp : Asset
 camp =
     image "taborbizon.jpg"
 
 
-defaultAvatar : Image
+defaultAvatar : Asset
 defaultAvatar =
     image "smiley-cyrus.jpg"
 
 
-image : String -> Image
+image : String -> Asset
 image filename =
     Image ("/assets/images/" ++ filename)
 
 
+file : String -> Asset
+file filename =
+    File ("/assets/files/" ++ filename)
 
+
+
+-- file : String -> File
 -- USING IMAGES
 
 
-src : Image -> Attribute msg
-src (Image url) =
-    Attr.src url
+src : Asset -> Attribute msg
+src asset =
+    case asset of
+        Image url ->
+            Attr.src url
+
+        File url ->
+            Attr.src url
+
+
+href : Asset -> Attribute msg
+href asset =
+    case asset of
+        Image url ->
+            Attr.href url
+
+        File url ->
+            Attr.href url

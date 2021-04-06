@@ -4938,7 +4938,24 @@ function _Browser_load(url)
 		}
 	}));
 }
-var $author$project$Main$ChangedUrl = function (a) {
+
+
+function _Url_percentEncode(string)
+{
+	return encodeURIComponent(string);
+}
+
+function _Url_percentDecode(string)
+{
+	try
+	{
+		return $elm$core$Maybe$Just(decodeURIComponent(string));
+	}
+	catch (e)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
+}var $author$project$Main$ChangedUrl = function (a) {
 	return {$: 'ChangedUrl', a: a};
 };
 var $author$project$Main$ClickedLink = function (a) {
@@ -10543,6 +10560,16 @@ var $elm$core$Basics$never = function (_v0) {
 	}
 };
 var $elm$browser$Browser$application = _Browser_application;
+var $author$project$Main$NotFound = {$: 'NotFound'};
+var $author$project$Asset$File = function (a) {
+	return {$: 'File', a: a};
+};
+var $author$project$Asset$file = function (filename) {
+	return $author$project$Asset$File('/assets/files/' + filename);
+};
+var $author$project$Asset$documentFiles = {
+	zdravotnyDotaznik: $author$project$Asset$file('dotaznik.pdf')
+};
 var $author$project$Asset$Image = function (a) {
 	return {$: 'Image', a: a};
 };
@@ -10553,18 +10580,247 @@ var $author$project$Asset$teamImages = {
 	margareta: $author$project$Asset$image('meme.jpg'),
 	monika: $author$project$Asset$image('monula.jpg')
 };
-var $author$project$Main$init = F3(
-	function (window, _v0, _v1) {
+var $author$project$Home$init = function (_v0) {
+	return _Utils_Tuple2(
+		{
+			documents: _List_fromArray(
+				[
+					{file: $author$project$Asset$documentFiles.zdravotnyDotaznik, name: 'Zdravotný dotazník'}
+				]),
+			team: _List_fromArray(
+				[
+					{image: $author$project$Asset$teamImages.monika, name: 'Monika Polcová'},
+					{image: $author$project$Asset$teamImages.margareta, name: 'Margareta Mašírová'}
+				])
+		},
+		$elm$core$Platform$Cmd$none);
+};
+var $elm$url$Url$Parser$State = F5(
+	function (visited, unvisited, params, frag, value) {
+		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
+	});
+var $elm$url$Url$Parser$getFirstMatch = function (states) {
+	getFirstMatch:
+	while (true) {
+		if (!states.b) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var state = states.a;
+			var rest = states.b;
+			var _v1 = state.unvisited;
+			if (!_v1.b) {
+				return $elm$core$Maybe$Just(state.value);
+			} else {
+				if ((_v1.a === '') && (!_v1.b.b)) {
+					return $elm$core$Maybe$Just(state.value);
+				} else {
+					var $temp$states = rest;
+					states = $temp$states;
+					continue getFirstMatch;
+				}
+			}
+		}
+	}
+};
+var $elm$url$Url$Parser$removeFinalEmpty = function (segments) {
+	if (!segments.b) {
+		return _List_Nil;
+	} else {
+		if ((segments.a === '') && (!segments.b.b)) {
+			return _List_Nil;
+		} else {
+			var segment = segments.a;
+			var rest = segments.b;
+			return A2(
+				$elm$core$List$cons,
+				segment,
+				$elm$url$Url$Parser$removeFinalEmpty(rest));
+		}
+	}
+};
+var $elm$url$Url$Parser$preparePath = function (path) {
+	var _v0 = A2($elm$core$String$split, '/', path);
+	if (_v0.b && (_v0.a === '')) {
+		var segments = _v0.b;
+		return $elm$url$Url$Parser$removeFinalEmpty(segments);
+	} else {
+		var segments = _v0;
+		return $elm$url$Url$Parser$removeFinalEmpty(segments);
+	}
+};
+var $elm$url$Url$Parser$addToParametersHelp = F2(
+	function (value, maybeList) {
+		if (maybeList.$ === 'Nothing') {
+			return $elm$core$Maybe$Just(
+				_List_fromArray(
+					[value]));
+		} else {
+			var list = maybeList.a;
+			return $elm$core$Maybe$Just(
+				A2($elm$core$List$cons, value, list));
+		}
+	});
+var $elm$url$Url$percentDecode = _Url_percentDecode;
+var $elm$url$Url$Parser$addParam = F2(
+	function (segment, dict) {
+		var _v0 = A2($elm$core$String$split, '=', segment);
+		if ((_v0.b && _v0.b.b) && (!_v0.b.b.b)) {
+			var rawKey = _v0.a;
+			var _v1 = _v0.b;
+			var rawValue = _v1.a;
+			var _v2 = $elm$url$Url$percentDecode(rawKey);
+			if (_v2.$ === 'Nothing') {
+				return dict;
+			} else {
+				var key = _v2.a;
+				var _v3 = $elm$url$Url$percentDecode(rawValue);
+				if (_v3.$ === 'Nothing') {
+					return dict;
+				} else {
+					var value = _v3.a;
+					return A3(
+						$elm$core$Dict$update,
+						key,
+						$elm$url$Url$Parser$addToParametersHelp(value),
+						dict);
+				}
+			}
+		} else {
+			return dict;
+		}
+	});
+var $elm$url$Url$Parser$prepareQuery = function (maybeQuery) {
+	if (maybeQuery.$ === 'Nothing') {
+		return $elm$core$Dict$empty;
+	} else {
+		var qry = maybeQuery.a;
+		return A3(
+			$elm$core$List$foldr,
+			$elm$url$Url$Parser$addParam,
+			$elm$core$Dict$empty,
+			A2($elm$core$String$split, '&', qry));
+	}
+};
+var $elm$url$Url$Parser$parse = F2(
+	function (_v0, url) {
+		var parser = _v0.a;
+		return $elm$url$Url$Parser$getFirstMatch(
+			parser(
+				A5(
+					$elm$url$Url$Parser$State,
+					_List_Nil,
+					$elm$url$Url$Parser$preparePath(url.path),
+					$elm$url$Url$Parser$prepareQuery(url.query),
+					url.fragment,
+					$elm$core$Basics$identity)));
+	});
+var $author$project$Main$Home = {$: 'Home'};
+var $elm$url$Url$Parser$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
+var $elm$url$Url$Parser$mapState = F2(
+	function (func, _v0) {
+		var visited = _v0.visited;
+		var unvisited = _v0.unvisited;
+		var params = _v0.params;
+		var frag = _v0.frag;
+		var value = _v0.value;
+		return A5(
+			$elm$url$Url$Parser$State,
+			visited,
+			unvisited,
+			params,
+			frag,
+			func(value));
+	});
+var $elm$url$Url$Parser$map = F2(
+	function (subValue, _v0) {
+		var parseArg = _v0.a;
+		return $elm$url$Url$Parser$Parser(
+			function (_v1) {
+				var visited = _v1.visited;
+				var unvisited = _v1.unvisited;
+				var params = _v1.params;
+				var frag = _v1.frag;
+				var value = _v1.value;
+				return A2(
+					$elm$core$List$map,
+					$elm$url$Url$Parser$mapState(value),
+					parseArg(
+						A5($elm$url$Url$Parser$State, visited, unvisited, params, frag, subValue)));
+			});
+	});
+var $elm$url$Url$Parser$oneOf = function (parsers) {
+	return $elm$url$Url$Parser$Parser(
+		function (state) {
+			return A2(
+				$elm$core$List$concatMap,
+				function (_v0) {
+					var parser = _v0.a;
+					return parser(state);
+				},
+				parsers);
+		});
+};
+var $elm$url$Url$Parser$top = $elm$url$Url$Parser$Parser(
+	function (state) {
+		return _List_fromArray(
+			[state]);
+	});
+var $author$project$Main$parser = $elm$url$Url$Parser$oneOf(
+	_List_fromArray(
+		[
+			A2($elm$url$Url$Parser$map, $author$project$Main$Home, $elm$url$Url$Parser$top)
+		]));
+var $author$project$Main$GotHomeMessage = function (a) {
+	return {$: 'GotHomeMessage', a: a};
+};
+var $author$project$Main$HomePage = function (a) {
+	return {$: 'HomePage', a: a};
+};
+var $author$project$Main$toHome = F2(
+	function (model, _v0) {
+		var home = _v0.a;
+		var cmd = _v0.b;
 		return _Utils_Tuple2(
-			{
-				team: _List_fromArray(
-					[
-						{image: $author$project$Asset$teamImages.monika, name: 'Monika Polcová'},
-						{image: $author$project$Asset$teamImages.margareta, name: 'Margareta Mašírová'}
-					]),
-				window: window
-			},
-			$elm$core$Platform$Cmd$none);
+			_Utils_update(
+				model,
+				{
+					page: $author$project$Main$HomePage(home)
+				}),
+			A2($elm$core$Platform$Cmd$map, $author$project$Main$GotHomeMessage, cmd));
+	});
+var $author$project$Main$updateUrl = F2(
+	function (url, model) {
+		var _v0 = A2($elm$url$Url$Parser$parse, $author$project$Main$parser, url);
+		if (_v0.$ === 'Just') {
+			if (_v0.a.$ === 'Home') {
+				var _v1 = _v0.a;
+				return A2(
+					$author$project$Main$toHome,
+					model,
+					$author$project$Home$init(_Utils_Tuple0));
+			} else {
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{page: $author$project$Main$NotFound}),
+					$elm$core$Platform$Cmd$none);
+			}
+		} else {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{page: $author$project$Main$NotFound}),
+				$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Main$init = F3(
+	function (window, url, key) {
+		return A2(
+			$author$project$Main$updateUrl,
+			url,
+			{key: key, page: $author$project$Main$NotFound, window: window});
 	});
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
@@ -10585,9 +10841,14 @@ var $elm$html$Html$Attributes$src = function (url) {
 		'src',
 		_VirtualDom_noJavaScriptOrHtmlUri(url));
 };
-var $author$project$Asset$src = function (_v0) {
-	var url = _v0.a;
-	return $elm$html$Html$Attributes$src(url);
+var $author$project$Asset$src = function (asset) {
+	if (asset.$ === 'Image') {
+		var url = asset.a;
+		return $elm$html$Html$Attributes$src(url);
+	} else {
+		var url = asset.a;
+		return $elm$html$Html$Attributes$src(url);
+	}
 };
 var $elm$html$Html$Attributes$height = function (n) {
 	return A2(
@@ -10595,7 +10856,7 @@ var $elm$html$Html$Attributes$height = function (n) {
 		'height',
 		$elm$core$String$fromInt(n));
 };
-var $author$project$Main$viewAnimator = function (_v0) {
+var $author$project$Home$viewAnimator = function (_v0) {
 	var name = _v0.name;
 	var image = _v0.image;
 	return A2(
@@ -10614,10 +10875,13 @@ var $author$project$Main$viewAnimator = function (_v0) {
 				_List_Nil)
 			]));
 };
-var $author$project$Main$viewTeam = function (animators) {
-	return A2($elm$core$List$map, $author$project$Main$viewAnimator, animators);
+var $author$project$Home$viewTeam = function (animators) {
+	return A2(
+		$elm$html$Html$ul,
+		_List_Nil,
+		A2($elm$core$List$map, $author$project$Home$viewAnimator, animators));
 };
-var $author$project$Main$viewAboutUs = function (team) {
+var $author$project$Home$viewAboutUs = function (team) {
 	return A2(
 		$elm$html$Html$div,
 		_List_Nil,
@@ -10662,14 +10926,124 @@ var $author$project$Main$viewAboutUs = function (team) {
 							[
 								$elm$html$Html$text('Animátori')
 							])),
-						A2(
-						$elm$html$Html$ul,
-						_List_Nil,
-						$author$project$Main$viewTeam(team))
+						$author$project$Home$viewTeam(team)
 					]))
 			]));
 };
-var $author$project$Main$viewIntro = A2(
+var $author$project$Home$viewContacts = A2(
+	$elm$html$Html$div,
+	_List_Nil,
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$h2,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Kontakty')
+				])),
+			A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('tabor@bizon.sk')
+				]))
+		]));
+var $elm$html$Html$table = _VirtualDom_node('table');
+var $elm$html$Html$th = _VirtualDom_node('th');
+var $elm$html$Html$tr = _VirtualDom_node('tr');
+var $elm$html$Html$Attributes$download = function (fileName) {
+	return A2($elm$html$Html$Attributes$stringProperty, 'download', fileName);
+};
+var $author$project$Asset$href = function (asset) {
+	if (asset.$ === 'Image') {
+		var url = asset.a;
+		return $elm$html$Html$Attributes$href(url);
+	} else {
+		var url = asset.a;
+		return $elm$html$Html$Attributes$href(url);
+	}
+};
+var $elm$html$Html$td = _VirtualDom_node('td');
+var $author$project$Home$viewDocument = function (_v0) {
+	var name = _v0.name;
+	var file = _v0.file;
+	return A2(
+		$elm$html$Html$tr,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$td,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(name)
+					])),
+				A2(
+				$elm$html$Html$td,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$a,
+						_List_fromArray(
+							[
+								$author$project$Asset$href(file),
+								$elm$html$Html$Attributes$download(name)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Stiahnuť')
+							]))
+					]))
+			]));
+};
+var $author$project$Home$viewDocuments = function (documents) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Dokumenty')
+					])),
+				A2(
+				$elm$html$Html$table,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$tr,
+						_List_Nil,
+						_Utils_ap(
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$th,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Dokument')
+										])),
+									A2(
+									$elm$html$Html$th,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Akcie')
+										]))
+								]),
+							A2($elm$core$List$map, $author$project$Home$viewDocument, documents)))
+					]))
+			]));
+};
+var $author$project$Home$viewIntro = A2(
 	$elm$html$Html$div,
 	_List_Nil,
 	_List_fromArray(
@@ -10696,14 +11070,37 @@ var $author$project$Main$viewIntro = A2(
 					$elm$html$Html$text('PRIHLÁSIŤ')
 				]))
 		]));
-var $author$project$Main$viewBody = function (model) {
+var $author$project$Home$viewSubmitOption = A2(
+	$elm$html$Html$div,
+	_List_Nil,
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$h2,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Prihlásiť sa môžete tu')
+				])),
+			A2(
+			$elm$html$Html$button,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('PRIHLÁSIŤ')
+				]))
+		]));
+var $author$project$Home$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
 		_List_Nil,
 		_List_fromArray(
 			[
-				$author$project$Main$viewIntro,
-				$author$project$Main$viewAboutUs(model.team)
+				$author$project$Home$viewIntro,
+				$author$project$Home$viewAboutUs(model.team),
+				$author$project$Home$viewDocuments(model.documents),
+				$author$project$Home$viewSubmitOption,
+				$author$project$Home$viewContacts
 			]));
 };
 var $elm$html$Html$nav = _VirtualDom_node('nav');
@@ -10721,12 +11118,21 @@ var $author$project$Main$viewHeader = A2(
 				]))
 		]));
 var $author$project$Main$view = function (model) {
+	var content = function () {
+		var _v0 = model.page;
+		if (_v0.$ === 'HomePage') {
+			var home = _v0.a;
+			return A2(
+				$elm$html$Html$map,
+				$author$project$Main$GotHomeMessage,
+				$author$project$Home$view(home));
+		} else {
+			return $elm$html$Html$text('Nothing');
+		}
+	}();
 	return {
 		body: _List_fromArray(
-			[
-				$author$project$Main$viewHeader,
-				$author$project$Main$viewBody(model)
-			]),
+			[$author$project$Main$viewHeader, content]),
 		title: 'Tabor Bizon'
 	};
 };
@@ -10744,4 +11150,4 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 				},
 				A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$int));
 		},
-		A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$int)))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"NothingYet":[],"ChangedUrl":["Url.Url"],"ClickedLink":["Browser.UrlRequest"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}}}}})}});}(this));
+		A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$int)))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"ChangedUrl":["Url.Url"],"ClickedLink":["Browser.UrlRequest"],"GotHomeMessage":["Home.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Home.Msg":{"args":[],"tags":{"ClickedSubmitButton":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}}}}})}});}(this));
