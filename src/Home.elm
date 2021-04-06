@@ -25,7 +25,7 @@ type alias Model =
 
 
 type Msg
-    = ClickedSubmitButton
+    = NothingYet
 
 
 formUrl : String
