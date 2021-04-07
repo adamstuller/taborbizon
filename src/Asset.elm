@@ -1,4 +1,4 @@
-module Asset exposing (Asset, camp, defaultAvatar, documentFiles, href, src, teamImages)
+module Asset exposing (Asset, bizonLogo, camp, defaultAvatar, documentFiles, href, src, teamImages)
 
 {-| Assets, such as images, videos, and audio. (We only have images for now.)
 
@@ -58,6 +58,11 @@ camp =
 defaultAvatar : Asset
 defaultAvatar =
     image "smiley-cyrus.jpg"
+
+
+bizonLogo : Asset
+bizonLogo =
+    image "bizonlogo.png"
 
 
 image : String -> Asset

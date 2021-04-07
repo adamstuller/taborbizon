@@ -114,13 +114,6 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    Grid.container []
-        [ viewForm model
-        ]
-
-
-viewForm : Model -> Html Msg
-viewForm model =
     Form.form []
         [ Form.group []
             [ Form.label [ for "childName" ] [ text "Meno a priezvisko dieťaťa" ]
