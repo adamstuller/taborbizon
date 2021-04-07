@@ -93,6 +93,14 @@ update msg model =
         ChangedUrl url ->
             updateUrl url model
 
+        GotFormMessage formMessage ->
+            case model.page of
+                FormPage form ->
+                    toForm model (Form.update formMessage form)
+
+                _ ->
+                    ( model, Cmd.none )
+
         _ ->
             ( model, Cmd.none )
 
