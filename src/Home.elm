@@ -1,8 +1,16 @@
 module Home exposing (Model, Msg, init, update, view)
 
 import Asset
+import Element as E
+import Element.Background as B
+import Element.Border as Bo
+import Element.Events as Ev
+import Element.Font as F
+import Element.Input as I
+import Element.Lazy as L
+import Element.Region as R
 import Html exposing (Html, a, button, div, h1, h2, img, li, p, table, td, text, th, tr, ul)
-import Html.Attributes exposing (download, height, href)
+import Html.Attributes exposing (class, download, height, href, style)
 import Html.Events exposing (onClick)
 
 
@@ -40,13 +48,54 @@ update _ model =
 
 viewIntro : Html Msg
 viewIntro =
-    div []
-        [ h1 [] [ text "Tábor Bizón - 2021" ]
-        , h2 [] [ text "Putovanie za Betlehemskou hviezdou" ]
-        , button []
-            [ a [ href formUrl ] [ text "PRIHLÁSIŤ" ]
+    E.layout [] <|
+        E.column
+            [ E.width E.fill
+
+            -- , E.explain Debug.todo
+            , E.padding 50
+            , E.spacingXY 20 20
+            , E.htmlAttribute (style "min-height" "calc(100vh)")
+            , B.color (E.rgb255 95 71 127)
             ]
+            [ viewTitle, viewSubtitle, viewSubmitLink ]
+
+
+viewTitle : E.Element Msg
+viewTitle =
+    E.row
+        [ F.size 150
+        , E.centerY
+        , E.paddingXY 0 10
+        , F.color (E.rgb255 255 255 255)
+        , F.bold
         ]
+        [ E.text "TÁBOR BIZÓN - 2021" ]
+
+
+viewSubtitle : E.Element Msg
+viewSubtitle =
+    E.row
+        [ F.size 75
+        , E.centerY
+        , E.paddingXY 0 20
+        , F.color (E.rgb255 210 197 227)
+        ]
+        [ E.text "Putovanie za betlehemskou hviezdou" ]
+
+
+viewSubmitLink : E.Element Msg
+viewSubmitLink =
+    E.row
+        [ E.centerY
+        , E.padding 20
+        , F.size 40
+        , B.color (E.rgb255 250 105 128)
+        , F.color (E.rgb255 255 255 255)
+        , Bo.rounded 3
+        , E.mouseOver [ B.color (E.rgb255 246 147 163) ]
+        ]
+        [ E.link [ E.mouseOver [ F.color (E.rgb255 255 255 255) ] ] { url = formUrl, label = E.text "PRIHLÁSIŤ" } ]
 
 
 viewAboutUs : List Animator -> Html Msg
@@ -122,9 +171,10 @@ view model =
     div []
         [ viewIntro
         , viewAboutUs model.team
-        , viewDocuments model.documents
-        , viewSubmitOption
-        , viewContacts
+
+        -- , viewDocuments model.documents
+        -- , viewSubmitOption
+        -- , viewContacts
         ]
 
 

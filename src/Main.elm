@@ -52,6 +52,8 @@ viewHeader { navbarState } =
     Navbar.config NavbarMsg
         |> Navbar.withAnimation
         |> Navbar.collapseMedium
+        -- |> Navbar.fixTop
+        -- |> Navbar.container
         |> Navbar.brand [ href "/" ]
             [ img
                 [ Asset.src Asset.bizonLogo
@@ -85,7 +87,7 @@ view model =
                     text "Nothing"
     in
     { title = "Tabor Bizon"
-    , body = [ viewHeader model, Grid.container [] [ content ] ]
+    , body = [ content ]
     }
 
 
@@ -144,7 +146,7 @@ init window url key =
                 , navbarState = navbarState
                 }
     in
-    ( model, navbarCmd )
+    ( model, Cmd.none )
 
 
 parser : Parser (Route -> a) a
