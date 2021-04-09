@@ -10,7 +10,7 @@ import Element.Input as I
 import Element.Lazy as L
 import Element.Region as R exposing (description)
 import Html exposing (Html, a, button, div, h1, h2, img, li, p, table, td, text, th, tr, ul)
-import Html.Attributes exposing (class, download, height, href, style)
+import Html.Attributes exposing (class, download, height, href, id, style)
 import Html.Events exposing (onClick)
 import List
 import Ui exposing (color)
@@ -101,7 +101,7 @@ viewIntro =
         , E.padding 50
         , E.spacingXY 20 20
         , E.htmlAttribute (style "min-height" "calc(100vh)")
-        , B.color (E.rgb255 95 71 127)
+        , B.color color.purple
         , B.image <| Asset.filepath Asset.largeIntro
         ]
         [ viewTitle, viewSubtitle, viewSubmitLinkIntro "PRIHLÁSIŤ" ]
@@ -148,11 +148,8 @@ viewAboutUs : List Animator -> E.Element Msg
 viewAboutUs model =
     E.column
         [ E.centerX
-
-        -- , E.paddingXY 100 20
         , E.spacing 40
-
-        -- , E.explain Debug.todo
+        , E.htmlAttribute (id "about")
         , E.width (E.px 1000)
         ]
         [ viewSectionTitle "O NÁS"
@@ -386,21 +383,20 @@ viewContacts =
         [ viewSectionTitle "KONTAKTY", viewContactLinks ]
 
 
-view : Model -> Html Msg
+view : Model -> E.Element Msg
 view model =
-    E.layout [] <|
-        E.column
-            [ E.width E.fill
-            , E.spacing 150
+    E.column
+        [ E.width E.fill
+        , E.spacing 150
 
-            -- , E.explain Debug.todo
-            ]
-            [ viewIntro
-            , viewAboutUs model.selectedTeam
-            , viewDocuments model.documents
-            , viewSubmitOption
-            , viewContacts
-            ]
+        -- , E.explain Debug.todo
+        ]
+        [ viewIntro
+        , viewAboutUs model.selectedTeam
+        , viewDocuments model.documents
+        , viewSubmitOption
+        , viewContacts
+        ]
 
 
 init : () -> ( Model, Cmd Msg )

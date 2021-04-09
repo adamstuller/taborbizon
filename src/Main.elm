@@ -3,10 +3,18 @@ module Main exposing (main)
 import Asset exposing (Asset)
 import Browser exposing (Document)
 import Browser.Navigation as Nav
+import Element as E
+import Element.Background as B
+import Element.Border as Bo
+import Element.Events as Ev
+import Element.Font as F
+import Element.Input as I
+import Element.Lazy as L
 import Form
 import Home
 import Html exposing (Html, h1, img, nav, text)
 import Html.Attributes exposing (class, href, style)
+import Ui exposing (color)
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser, s, string)
 
@@ -44,6 +52,49 @@ type Route
 -- View --
 
 
+logo : E.Element msg
+logo =
+    E.el
+        [ E.width <| E.px 40
+        , Bo.color color.grey
+        ]
+    <|
+        E.image
+            [ E.height E.fill
+            , E.width E.fill
+            ]
+            { src = Asset.filepath Asset.bizonLogo, description = "Logo" }
+
+
+viewNavbar : E.Element Msg
+viewNavbar =
+    let
+        link { label, url } =
+            E.link
+                [ E.mouseOver [ F.color color.white ]
+                ]
+                { url = url, label = E.text label }
+    in
+    E.row
+        [ E.width E.fill
+        , B.color color.purple
+        , F.color color.white
+        , F.extraLight
+        ]
+        [ E.row
+            [ E.width E.fill
+            , E.padding 20
+            , E.spacing 40
+            , E.centerX
+            ]
+            [ logo
+            , E.el [ E.alignLeft ] <| E.text "Bizón"
+            , E.el [ E.alignRight ] <| link { url = "/", label = "Domov" }
+            , E.el [ E.alignRight ] <| link { url = "/form", label = "Registracia" }
+            ]
+        ]
+
+
 view : Model -> Document Msg
 view model =
     let
@@ -51,17 +102,16 @@ view model =
             case model.page of
                 HomePage home ->
                     Home.view home
-                        |> Html.map GotHomeMessage
+                        |> E.map GotHomeMessage
 
-                FormPage form ->
-                    Form.view form
-                        |> Html.map GotFormMessage
-
+                -- FormPage form ->
+                --     Form.view form
+                --         |> Html.map GotFormMessage
                 _ ->
-                    text "Nothing"
+                    E.text "Nothing"
     in
     { title = "Tabor Bizon"
-    , body = [ content ]
+    , body = [ E.layout [ E.inFront viewNavbar ] <| E.column [ E.width E.fill ] [ content ] ]
     }
 
 
