@@ -30,12 +30,15 @@ type alias DocumentFile =
 
 type alias Model =
     { team : List Animator
+    , selectedTeam : List Animator
     , documents : List DocumentFile
     }
 
 
 type Msg
     = NothingYet
+    | TeamShiftedRight
+    | TeamShiftedLeft
 
 
 formUrl : String
@@ -43,9 +46,50 @@ formUrl =
     "/form"
 
 
+shiftL : List a -> List a
+shiftL list =
+    case list of
+        [] ->
+            []
+
+        x :: [] ->
+            [ x ]
+
+        x :: rest ->
+            rest ++ [ x ]
+
+
+shiftR : List a -> List a
+shiftR list =
+    case List.reverse list of
+        [] ->
+            []
+
+        x :: [] ->
+            [ x ]
+
+        x :: rest ->
+            List.reverse <| rest ++ [ x ]
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
-update _ model =
-    ( model, Cmd.none )
+update msg model =
+    let
+        shiftedTeamRight =
+            shiftR model.team
+
+        shiftedTeamLeft =
+            shiftL model.team
+    in
+    case msg of
+        TeamShiftedLeft ->
+            ( { model | selectedTeam = List.take 5 shiftedTeamLeft, team = shiftedTeamLeft }, Cmd.none )
+
+        TeamShiftedRight ->
+            ( { model | selectedTeam = List.take 5 shiftedTeamRight, team = shiftedTeamRight }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 viewIntro : E.Element Msg
@@ -161,11 +205,59 @@ viewAnimator l { name, image } =
                 , Bo.rounded 100
                 , E.clip
                 , E.width E.fill
+                , E.height E.fill
                 ]
                 { src = Asset.filepath image, description = name }
             ]
-        , E.row [ E.centerX ]
+        , E.row [ E.centerX, F.size 16 ]
             [ E.text name ]
+        ]
+
+
+type Alignment
+    = L
+    | R
+
+
+viewArrow : Int -> Asset.Asset -> Alignment -> E.Element Msg
+viewArrow len arrow align =
+    let
+        portion =
+            (len + 1) // 2
+
+        alignment =
+            case align of
+                R ->
+                    E.alignRight
+
+                L ->
+                    E.alignLeft
+
+        description =
+            case align of
+                R ->
+                    "Right arrow"
+
+                L ->
+                    "Left arrow"
+
+        clickEventMsg =
+            case align of
+                R ->
+                    TeamShiftedRight
+
+                L ->
+                    TeamShiftedLeft
+    in
+    E.column [ E.width <| E.fillPortion portion ]
+        [ E.row [ E.centerY, E.width E.fill, E.height E.fill ]
+            [ E.image
+                [ alignment
+                , E.mouseOver [ B.color <| E.rgb255 222 222 222 ]
+                , Ev.onClick clickEventMsg
+                ]
+                { src = Asset.filepath arrow, description = description }
+            ]
         ]
 
 
@@ -174,8 +266,11 @@ viewTeam animators =
     let
         l =
             List.length animators
+
+        animatorList =
+            viewArrow l Asset.icons.arrowBack L :: List.map (viewAnimator l) animators ++ [ viewArrow l Asset.icons.arrowForth R ]
     in
-    E.row [ E.spacing 20 ] (List.map (viewAnimator l) animators)
+    E.row [ E.spacing 10 ] animatorList
 
 
 viewDocuments : List DocumentFile -> E.Element Msg
@@ -200,11 +295,7 @@ viewDocuments documents =
     in
     E.column
         [ E.centerX
-
-        -- , E.paddingXY 100 20
         , E.spacing 40
-
-        -- , E.explain Debug.todo
         , E.width (E.px 1000)
         ]
         [ viewSectionTitle "DOKUMENTY"
@@ -305,7 +396,7 @@ view model =
             -- , E.explain Debug.todo
             ]
             [ viewIntro
-            , viewAboutUs model.team
+            , viewAboutUs model.selectedTeam
             , viewDocuments model.documents
             , viewSubmitOption
             , viewContacts
@@ -314,19 +405,27 @@ view model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { team =
+    let
+        team =
             [ -- { name = "Monika Polcová", image = Asset.teamImages.monika }
               { name = "Margareta Mašírová", image = Asset.teamImages.margareta }
-            , { name = "Margareta Mašírová", image = Asset.teamImages.margareta }
-            , { name = "Margareta Mašírová", image = Asset.teamImages.margareta }
-            , { name = "Margareta Mašírová", image = Asset.teamImages.margareta }
-            , { name = "Margareta Mašírová", image = Asset.teamImages.margareta }
+            , { name = "Jakob Jan Juhas", image = Asset.teamImages.jakob }
+            , { name = "Monika Polcova", image = Asset.teamImages.monika }
+            , { name = "Debora Laktisova", image = Asset.teamImages.debora }
+            , { name = "Sona Zimmermanova", image = Asset.teamImages.sona }
+            , { name = "Vratko Bartos", image = Asset.teamImages.vratko }
+            , { name = "Pravko Bartos", image = Asset.teamImages.pravko }
+            , { name = "Matus Petras", image = Asset.teamImages.matus }
+            , { name = "Simon Kopernicky", image = Asset.teamImages.simon }
             ]
+    in
+    ( { team = team
       , documents =
             [ { name = "Zdravotný dotazník", file = Asset.documentFiles.zdravotnyDotaznik }
             , { name = "Zdravotný dotazník", file = Asset.documentFiles.zdravotnyDotaznik }
             , { name = "Zdravotný dotazník", file = Asset.documentFiles.zdravotnyDotaznik }
             ]
+      , selectedTeam = List.take 5 team
       }
     , Cmd.none
     )

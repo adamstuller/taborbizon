@@ -32,6 +32,13 @@ type Asset
 type alias TeamImages =
     { monika : Asset
     , margareta : Asset
+    , debora : Asset
+    , jakob : Asset
+    , sona : Asset
+    , pravko : Asset
+    , vratko : Asset
+    , simon : Asset
+    , matus : Asset
     }
 
 
@@ -39,6 +46,13 @@ teamImages : TeamImages
 teamImages =
     { monika = image "monula.jpg"
     , margareta = image "meme.jpg"
+    , debora = image "dede.jpg"
+    , jakob = image "jakob.jpg"
+    , sona = image "sona.jpg"
+    , pravko = image "pravko.jpg"
+    , vratko = image "vratko.jpg"
+    , simon = image "simon.jpg"
+    , matus = image "matus.jpg"
     }
 
 
@@ -53,11 +67,13 @@ documentFiles =
     }
 
 
-icons : { web : Asset, facebook : Asset, instagram : Asset }
+icons : { web : Asset, facebook : Asset, instagram : Asset, arrowForth : Asset, arrowBack : Asset }
 icons =
-    { web = icon "web.png"
-    , facebook = icon "facebook.png"
-    , instagram = icon "instagram.png"
+    { web = icon "web.svg"
+    , facebook = icon "facebook.svg"
+    , instagram = icon "instagram.svg"
+    , arrowForth = icon "arrow.svg"
+    , arrowBack = icon "arrow back.svg"
     }
 
 
