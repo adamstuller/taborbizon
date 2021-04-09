@@ -1,8 +1,6 @@
 module Main exposing (main)
 
 import Asset exposing (Asset)
-import Bootstrap.Grid as Grid
-import Bootstrap.Navbar as Navbar
 import Browser exposing (Document)
 import Browser.Navigation as Nav
 import Form
@@ -21,7 +19,6 @@ type alias Model =
     { page : Page
     , key : Nav.Key
     , window : Window
-    , navbarState : Navbar.State
     }
 
 
@@ -45,29 +42,6 @@ type Route
 
 
 -- View --
-
-
-viewHeader : Model -> Html Msg
-viewHeader { navbarState } =
-    Navbar.config NavbarMsg
-        |> Navbar.withAnimation
-        |> Navbar.collapseMedium
-        -- |> Navbar.fixTop
-        -- |> Navbar.container
-        |> Navbar.brand [ href "/" ]
-            [ img
-                [ Asset.src Asset.bizonLogo
-                , class "d-inline-block align-top"
-                , style "width" "30px"
-                ]
-                []
-            , text " Domov"
-            ]
-        |> Navbar.items
-            [ Navbar.itemLink [ href "/form" ] [ text "Prihlasit" ]
-            , Navbar.itemLink [ href "/gallery" ] [ text "Galeria" ]
-            ]
-        |> Navbar.view navbarState
 
 
 view : Model -> Document Msg
@@ -100,7 +74,6 @@ type Msg
     | ClickedLink Browser.UrlRequest
     | GotHomeMessage Home.Msg
     | GotFormMessage Form.Msg
-    | NavbarMsg Navbar.State
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -125,28 +98,27 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        NavbarMsg state ->
-            ( { model | navbarState = state }, Cmd.none )
+        GotHomeMessage homeMessage ->
+            case model.page of
+                HomePage home ->
+                    toHome model (Home.update homeMessage home)
 
-        _ ->
-            ( model, Cmd.none )
+                _ ->
+                    ( model, Cmd.none )
+
+
+
+-- _ ->
+--     ( model, Cmd.none )
 
 
 init : Window -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init window url key =
-    let
-        ( navbarState, navbarCmd ) =
-            Navbar.initialState NavbarMsg
-
-        ( model, _ ) =
-            updateUrl url
-                { page = NotFound
-                , window = window
-                , key = key
-                , navbarState = navbarState
-                }
-    in
-    ( model, Cmd.none )
+    updateUrl url
+        { page = NotFound
+        , window = window
+        , key = key
+        }
 
 
 parser : Parser (Route -> a) a
@@ -199,7 +171,7 @@ toForm model ( form, cmd ) =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Navbar.subscriptions model.navbarState NavbarMsg
+    Sub.none
 
 
 main : Program Window Model Msg
