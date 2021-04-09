@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="33" viewBox="0 0 25 33">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+
+      .cls-2 {
+        clip-path: url(#clip-path);
+      }
+
+      .cls-3 {
+        fill: #202124;
+      }
+    </style>
+    <clipPath id="clip-path">
+      <rect class="cls-1" width="25" height="33"/>
+    </clipPath>
+  </defs>
+  <g id="arrow" class="cls-2">
+    <path id="arrow-2" data-name="arrow" class="cls-3" d="M16.5,25a2.749,2.749,0,0,1-2.31-1.25L.99,7.083a4.791,4.791,0,0,1,0-5.833,2.759,2.759,0,0,1,4.62,0L16.5,15,27.39,1.25a2.759,2.759,0,0,1,4.62,0,4.791,4.791,0,0,1,0,5.833L18.81,23.75A2.749,2.749,0,0,1,16.5,25Z" transform="translate(0 33) rotate(-90)"/>
+  </g>
+</svg>
