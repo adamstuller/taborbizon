@@ -1,13 +1,16 @@
 module Asset exposing
     ( Asset
+    , baltazar
     , bizonLogo
     , camp
     , defaultAvatar
     , documentFiles
     , filepath
+    , gaspar
     , href
     , icons
     , largeIntro
+    , melichar
     , src
     , teamImages
     )
@@ -67,24 +70,33 @@ documentFiles =
     }
 
 
-icons : { web : Asset, facebook : Asset, instagram : Asset, arrowForth : Asset, arrowBack : Asset }
+icons : { web : Asset, webWhite : Asset, facebook : Asset, facebookWhite : Asset, instagram : Asset, instagramWhite : Asset, arrowForth : Asset, arrowBack : Asset, menu : Asset }
 icons =
     { web = icon "web.svg"
+    , webWhite = icon "web.white.svg"
     , facebook = icon "facebook.svg"
+    , facebookWhite = icon "facebook.white.svg"
     , instagram = icon "instagram.svg"
+    , instagramWhite = icon "instagram.white.svg"
     , arrowForth = icon "arrow.svg"
     , arrowBack = icon "arrow back.svg"
+    , menu = icon "menu.svg"
     }
 
 
+gaspar : Asset
+gaspar =
+    image "gaspar.png"
 
--- IMAGES
--- error : Image
--- error =
---     image "error.jpg"
--- loading : Image
--- loading =
---     image "loading.svg"
+
+melichar : Asset
+melichar =
+    image "melichar.png"
+
+
+baltazar : Asset
+baltazar =
+    image "baltazar.png"
 
 
 camp : Asset
