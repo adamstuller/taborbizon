@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Asset exposing (Asset)
 import Browser exposing (Document)
+import Browser.Events exposing (onResize)
 import Browser.Navigation as Nav
 import Element as E
 import Element.Background as B
@@ -23,10 +24,17 @@ import Url.Parser as Parser exposing ((</>), Parser, s, string)
 -- Model --
 
 
+type alias NavbarState =
+    { expanded : Bool
+    }
+
+
 type alias Model =
     { page : Page
     , key : Nav.Key
     , window : Window
+    , device : E.Device
+    , navbarState : NavbarState
     }
 
 
@@ -52,11 +60,12 @@ type Route
 -- View --
 
 
-logo : E.Element msg
-logo =
+logo : E.Attribute msg -> E.Element msg
+logo align =
     E.el
-        [ E.width <| E.px 40
+        [ E.width <| E.px 30
         , Bo.color color.grey
+        , align
         ]
     <|
         E.image
@@ -66,32 +75,126 @@ logo =
             { src = Asset.filepath Asset.bizonLogo, description = "Logo" }
 
 
-viewNavbar : E.Element Msg
-viewNavbar =
+viewNavbarBig : NavbarState -> E.Element Msg
+viewNavbarBig _ =
     let
         link { label, url } =
             E.link
-                [ E.mouseOver [ F.color color.white ]
+                [ E.mouseOver [ F.color color.purple ]
                 ]
                 { url = url, label = E.text label }
     in
     E.row
         [ E.width E.fill
-        , B.color color.purple
-        , F.color color.white
+        , B.color color.white
+        , F.color color.grey
         , F.extraLight
+        , Bo.widthEach { top = 0, bottom = 1, right = 0, left = 0 }
+        , Bo.color color.purple
         ]
         [ E.row
             [ E.width E.fill
-            , E.padding 20
+            , E.paddingXY 20 10
             , E.spacing 40
             , E.centerX
             ]
-            [ logo
+            [ logo E.alignLeft
             , E.el [ E.alignLeft ] <| E.text "Bizón"
             , E.el [ E.alignRight ] <| link { url = "/", label = "Domov" }
             , E.el [ E.alignRight ] <| link { url = "/form", label = "Registracia" }
             ]
+        ]
+
+
+viewNavbarSmall : NavbarState -> Window -> E.Element Msg
+viewNavbarSmall state window =
+    let
+        link { label, url } =
+            E.link
+                [ E.mouseOver [ F.color color.purple ]
+                ]
+                { url = url, label = E.text label }
+
+        menuIcon =
+            E.image
+                ([ E.alignLeft
+                 , E.centerY
+                 , E.paddingXY 20 20
+                 , Ev.onMouseDown <| NavbarExpandClicked True
+                 ]
+                    ++ expandedMenuPlaced
+                )
+                { src = Asset.filepath Asset.icons.menu, description = "menu" }
+
+        linkAttributes =
+            []
+
+        linkImage imageSrc =
+            E.image [] { src = Asset.filepath imageSrc, description = "website" }
+
+        contactIcons =
+            E.column
+                [ E.width E.fill
+                , E.htmlAttribute (style "min-height" "calc(20vh)")
+                , B.color color.grey
+                , E.alignBottom
+                ]
+                [ E.row [ F.color color.white, E.paddingXY 40 10, E.centerY, E.centerX ] [ E.text "tabor@bizon.sk" ]
+                , E.row [ E.paddingXY 40 10, E.centerY, E.centerX, E.spacingXY 10 0 ]
+                    [ E.link linkAttributes { url = "/", label = linkImage Asset.icons.webWhite }
+                    , E.link linkAttributes { url = "https://www.facebook.com/taborbizon", label = linkImage Asset.icons.facebookWhite }
+                    , E.link linkAttributes { url = "https://www.instagram.com/taborbizon", label = linkImage Asset.icons.instagramWhite }
+                    ]
+                ]
+
+        expandedMenu =
+            E.row
+                [ E.width <| E.px window.width
+                , E.htmlAttribute (style "min-height" "calc(100vh)")
+                ]
+                [ E.column
+                    [ E.width <| E.fillPortion 3 -- TODO: Scaling
+                    , E.htmlAttribute (style "min-height" "calc(100vh)")
+                    , B.color color.white
+                    , E.spacing 40
+                    , Bo.widthEach { top = 0, bottom = 0, right = 1, left = 0 }
+                    , Bo.color color.grey
+                    , Bo.shadow { offset = ( 1, 20 ), size = toFloat window.width / 8, blur = 60, color = color.lightGrey }
+                    ]
+                    [ E.el [ E.paddingXY 0 40, E.centerX ] <| logo E.centerX
+                    , E.el [ E.paddingXY 40 0 ] <| link { url = "/", label = "Domov" }
+                    , E.el [ E.paddingXY 40 0 ] <| link { url = "/form", label = "Registracia" }
+                    , contactIcons
+                    ]
+                , E.column
+                    [ E.width <| E.fillPortion 1 -- TODO: Scaling
+                    , E.htmlAttribute (style "min-height" "calc(100vh)")
+                    , Ev.onClick <| NavbarExpandClicked False
+                    ]
+                    []
+                ]
+
+        expandedMenuPlaced =
+            if state.expanded then
+                [ E.inFront <| E.column [] [ expandedMenu ] ]
+
+            else
+                []
+    in
+    E.row
+        [ E.width E.fill
+        , B.color color.white
+        , F.color color.grey
+        , F.extraLight
+        , Bo.widthEach { top = 0, bottom = 1, right = 0, left = 0 }
+        , Bo.color color.purple
+        , E.paddingXY 20 10
+        , E.spacing 40
+
+        -- , E.explain Debug.todo
+        , E.inFront <| E.column [] [ menuIcon ]
+        ]
+        [ logo E.centerX
         ]
 
 
@@ -104,14 +207,29 @@ view model =
                     Home.view home
                         |> E.map GotHomeMessage
 
-                -- FormPage form ->
-                --     Form.view form
-                --         |> Html.map GotFormMessage
+                FormPage form ->
+                    Form.view form
+                        |> E.map GotFormMessage
+
                 _ ->
                     E.text "Nothing"
+
+        navbar =
+            case model.device.class of
+                E.Phone ->
+                    viewNavbarSmall model.navbarState model.window
+
+                _ ->
+                    viewNavbarBig model.navbarState
     in
     { title = "Tabor Bizon"
-    , body = [ E.layout [ E.inFront viewNavbar ] <| E.column [ E.width E.fill ] [ content ] ]
+    , body =
+        [ E.layout
+            [ E.inFront navbar
+            ]
+          <|
+            E.column [ E.width E.fill ] [ content ]
+        ]
     }
 
 
@@ -124,6 +242,8 @@ type Msg
     | ClickedLink Browser.UrlRequest
     | GotHomeMessage Home.Msg
     | GotFormMessage Form.Msg
+    | WindowSizeChanged Window
+    | NavbarExpandClicked Bool
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -156,6 +276,12 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        WindowSizeChanged window ->
+            ( { model | window = window, device = E.classifyDevice window }, Cmd.none )
+
+        NavbarExpandClicked expanded ->
+            ( { model | navbarState = { expanded = expanded } }, Cmd.none )
+
 
 
 -- _ ->
@@ -168,6 +294,8 @@ init window url key =
         { page = NotFound
         , window = window
         , key = key
+        , device = E.classifyDevice window
+        , navbarState = { expanded = False }
         }
 
 
@@ -221,7 +349,9 @@ toForm model ( form, cmd ) =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    onResize <|
+        \width height ->
+            WindowSizeChanged { width = width, height = height }
 
 
 main : Program Window Model Msg
