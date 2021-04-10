@@ -52,9 +52,6 @@ shiftL list =
         [] ->
             []
 
-        x :: [] ->
-            [ x ]
-
         x :: rest ->
             rest ++ [ x ]
 
@@ -64,9 +61,6 @@ shiftR list =
     case List.reverse list of
         [] ->
             []
-
-        x :: [] ->
-            [ x ]
 
         x :: rest ->
             List.reverse <| rest ++ [ x ]
@@ -247,7 +241,13 @@ viewArrow len arrow align =
                     TeamShiftedLeft
     in
     E.column [ E.width <| E.fillPortion portion ]
-        [ E.row [ E.centerY, E.width E.fill, E.height E.fill ]
+        [ E.row
+            [ E.centerY
+            , E.width E.fill
+            , E.height E.fill
+
+            -- , E.explain Debug.todo
+            ]
             [ E.image
                 [ alignment
                 , E.mouseOver [ B.color <| E.rgb255 222 222 222 ]
