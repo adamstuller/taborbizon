@@ -1,4 +1,13 @@
-module Ui exposing (Window, color, container, containerForm, containerSmall)
+module Ui exposing
+    ( Window
+    , color
+    , container
+    , containerFormBigDesktop
+    , containerFormDesktop
+    , containerFormPhone
+    , containerFormTablet
+    , containerSmall
+    )
 
 import Element as E exposing (Color)
 import Html.Attributes exposing (style)
@@ -46,8 +55,8 @@ containerSmall =
         ]
 
 
-containerForm : List (E.Element msg) -> E.Element msg
-containerForm =
+containerFormBigDesktop : List (E.Element msg) -> E.Element msg
+containerFormBigDesktop =
     E.column
         [ E.centerX
         , E.spacing 50
@@ -58,8 +67,32 @@ containerForm =
         ]
 
 
-containerFormSmall : List (E.Element msg) -> E.Element msg
-containerFormSmall =
+containerFormDesktop : List (E.Element msg) -> E.Element msg
+containerFormDesktop =
+    E.column
+        [ E.centerX
+        , E.spacing 50
+        , E.htmlAttribute (style "max-width" "80%")
+        , E.width E.fill
+
+        -- , E.explain Debug.todo
+        ]
+
+
+containerFormTablet : List (E.Element msg) -> E.Element msg
+containerFormTablet =
+    E.column
+        [ E.centerX
+        , E.spacing 50
+        , E.htmlAttribute (style "max-width" "60%")
+        , E.width E.fill
+
+        -- , E.explain Debug.todo
+        ]
+
+
+containerFormPhone : List (E.Element msg) -> E.Element msg
+containerFormPhone =
     E.column
         [ E.centerX
         , E.spacing 50

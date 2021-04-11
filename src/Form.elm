@@ -12,7 +12,7 @@ import Element.Lazy as L
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
-import Ui exposing (Window, color, container, containerForm, containerSmall)
+import Ui exposing (Window, color, container, containerFormBigDesktop, containerFormDesktop, containerFormPhone, containerFormTablet, containerSmall)
 
 
 
@@ -170,26 +170,34 @@ view model window device =
                 _ ->
                     []
 
+        rowHeight =
+            case device.class of
+                E.BigDesktop ->
+                    E.htmlAttribute (style "min-height" "calc(100vh)")
+
+                E.Desktop ->
+                    E.htmlAttribute (style "min-height" "calc(120vh)")
+
+                _ ->
+                    E.htmlAttribute (style "min-height" "calc(100vh)")
+
         viewForm =
             case device.class of
                 E.BigDesktop ->
-                    viewFormBig model window
+                    containerFormBigDesktop <| viewFormBig model window
 
                 E.Desktop ->
-                    viewFormBig model window
+                    containerFormDesktop <| viewFormBig model window
 
                 E.Tablet ->
-                    viewFormSmall model window
+                    containerFormTablet <| viewFormSmall model window
 
                 E.Phone ->
-                    viewFormSmall model window
+                    containerFormPhone <| viewFormSmall model window
     in
     E.row
         [ E.width E.fill
-        , E.htmlAttribute (style "min-height" "calc(120vh)")
-
-        -- , E.height <|
-        --     E.minimum window.height E.fill
+        , rowHeight
         ]
     <|
         E.column
@@ -286,84 +294,82 @@ viewSubmitButton =
         { onPress = Just FormSubmitted, label = E.text "Odoslať" }
 
 
-viewFormBig : Model -> Window -> E.Element Msg
+viewFormBig : Model -> Window -> List (E.Element Msg)
 viewFormBig model { width } =
-    containerForm <|
-        [ E.row
-            [ E.width E.fill
-            , E.height <| E.px 80
-            ]
-            []
-        , viewSectionTitle "ZAVAZNA REGISTRÁCIA" 60
-        , E.row
-            [ E.width E.fill
-            , F.size 13
-            , E.centerX
-            , E.height E.fill
-            , E.spacingXY 20 0
-            ]
-            [ E.column
-                [ E.width <| E.fillPortion 2
-                , E.alignLeft
-                , E.spacingXY 0 20
-                , E.height E.fill
-                ]
-                [ viewStringInput "Meno a priezvisko dieťaťa" model.childName ChildNameChanged [ E.alignLeft, E.width E.fill ]
-                , viewStringInput "Adresa bydliska" model.address AddressChanged [ E.alignLeft, E.width E.fill ]
-                , viewStringInput "Dátum narodenia" model.birthDate BirthDateChanged [ E.alignLeft, E.width E.fill ]
-                , viewStringInput "Meno a priezvisko zákonného zástupcu" model.adultName AdultNameChanged [ E.alignLeft, E.width E.fill ]
-                , viewStringInput "Telefónne číslo zákonného zástupcu" model.adultPhone AdultPhoneChanged [ E.alignLeft, E.width E.fill ]
-                , viewStringInput "E-mail zákonného zástupcu" model.adultEmail AdultEmailChanged [ E.alignLeft, E.width E.fill ]
-                ]
-            , E.column
-                [ E.width <| E.fillPortion 2
-                , E.spacingXY 0 20
-                , E.alignTop
-                , E.alignRight
-                ]
-                [ viewLongTextInput model.specialDiet [ E.alignRight, E.width E.fill ]
-                , viewRadioInput model.tshirtSize [ E.alignRight, E.width E.fill ]
-                ]
-            ]
-        , E.row
-            [ E.width E.fill
-            , E.centerX
+    [ E.row
+        [ E.width E.fill
+        , E.height <| E.px 80
+        ]
+        []
+    , viewSectionTitle "ZAVAZNA REGISTRÁCIA" 60
+    , E.row
+        [ E.width E.fill
+        , F.size 13
+        , E.centerX
+        , E.height E.fill
+        , E.spacingXY 20 0
+        ]
+        [ E.column
+            [ E.width <| E.fillPortion 2
+            , E.alignLeft
+            , E.spacingXY 0 20
             , E.height E.fill
             ]
-            [ E.column [ E.width E.fill, E.spacing 20, E.height E.fill ]
-                [ viewCheckbox model.submitted SubmittedChanged "Týmto záväzne prihlasujem svoje dieťa do detského letného tábora Bizón a zároveň čestne vyhlasujem, že v prípade, ak si moje dieťa vezme do tábora mobil, peňažnú hotovosť, šperky alebo iné cennosti, preberám plnú zodpovednosť v prípade ich straty alebo odcudzenia." 13
-                , viewCheckbox model.consented ConsentedChanged "Týmto dávam dobrovoľne vyslovený súhlas občianskemu združenie eRko - HKSD v zmysle zákona Zákon č. 18/2018 Z. z. Zákon o ochrane osobných údajov a o zmene a doplnení niektorých zákonov v platnom znení (ďalej len \"zákon\") so spracovaním osobných údajov môjho dieťaťa, v rozsahu meno, priezvisko, adresa bydliska a rodné číslo pre účely spracovania súvisiace s organizáciou detského letného tábora Bizón. Súhlas udeľujem do 31.12.2021. Po tomto termíne môžu byť tieto údaje použité v upravenej forme len na účely štatistiky a evidencie. Zároveň vyhlasujem, že som si vedomý svojich práv vyplývajúcich zo zákona. " 13
-                , viewSubmitButton
-                ]
+            [ viewStringInput "Meno a priezvisko dieťaťa" model.childName ChildNameChanged [ E.alignLeft, E.width E.fill ]
+            , viewStringInput "Adresa bydliska" model.address AddressChanged [ E.alignLeft, E.width E.fill ]
+            , viewStringInput "Dátum narodenia" model.birthDate BirthDateChanged [ E.alignLeft, E.width E.fill ]
+            , viewStringInput "Meno a priezvisko zákonného zástupcu" model.adultName AdultNameChanged [ E.alignLeft, E.width E.fill ]
+            , viewStringInput "Telefónne číslo zákonného zástupcu" model.adultPhone AdultPhoneChanged [ E.alignLeft, E.width E.fill ]
+            , viewStringInput "E-mail zákonného zástupcu" model.adultEmail AdultEmailChanged [ E.alignLeft, E.width E.fill ]
+            ]
+        , E.column
+            [ E.width <| E.fillPortion 2
+            , E.spacingXY 0 20
+            , E.alignTop
+            , E.alignRight
+            ]
+            [ viewLongTextInput model.specialDiet [ E.alignRight, E.width E.fill ]
+            , viewRadioInput model.tshirtSize [ E.alignRight, E.width E.fill ]
             ]
         ]
-
-
-viewFormSmall : Model -> Window -> E.Element Msg
-viewFormSmall model { width } =
-    containerSmall <|
-        [ E.column [ E.width E.fill, E.spacingXY 0 20 ]
-            [ E.row
-                [ E.width E.fill
-                , E.height <| E.px 50
-                ]
-                []
-            , viewSectionTitle "ZAVAZNA REGISTRÁCIA" 32
-            , viewStringInput "Meno a priezvisko dieťaťa" model.childName ChildNameChanged [ E.centerX, F.size 13, E.width E.fill ]
-            , viewStringInput "Adresa bydliska" model.address AddressChanged [ E.centerX, F.size 13, E.width E.fill ]
-            , viewStringInput "Dátum narodenia" model.birthDate BirthDateChanged [ E.centerX, F.size 13, E.width E.fill ]
-            , viewStringInput "Meno a priezvisko zákonného zástupcu" model.adultName AdultNameChanged [ E.centerX, F.size 13, E.width E.fill ]
-            , viewStringInput "Telefónne číslo zákonného zástupcu" model.adultPhone AdultPhoneChanged [ E.centerX, F.size 13, E.width E.fill ]
-            , viewStringInput "E-mail zákonného zástupcu" model.adultEmail AdultEmailChanged [ E.centerX, F.size 13, E.width E.fill ]
-            , viewLongTextInput model.specialDiet [ E.centerX, F.size 13, E.width E.fill ]
-            , viewRadioInput model.tshirtSize [ E.centerX, F.size 13, E.width E.fill ]
-            , viewCheckbox model.submitted SubmittedChanged "Týmto záväzne prihlasujem svoje dieťa do detského letného tábora Bizón a zároveň čestne vyhlasujem, že v prípade, ak si moje dieťa vezme do tábora mobil, peňažnú hotovosť, šperky alebo iné cennosti, preberám plnú zodpovednosť v prípade ich straty alebo odcudzenia." 13
+    , E.row
+        [ E.width E.fill
+        , E.centerX
+        , E.height E.fill
+        ]
+        [ E.column [ E.width E.fill, E.spacing 20, E.height E.fill ]
+            [ viewCheckbox model.submitted SubmittedChanged "Týmto záväzne prihlasujem svoje dieťa do detského letného tábora Bizón a zároveň čestne vyhlasujem, že v prípade, ak si moje dieťa vezme do tábora mobil, peňažnú hotovosť, šperky alebo iné cennosti, preberám plnú zodpovednosť v prípade ich straty alebo odcudzenia." 13
             , viewCheckbox model.consented ConsentedChanged "Týmto dávam dobrovoľne vyslovený súhlas občianskemu združenie eRko - HKSD v zmysle zákona Zákon č. 18/2018 Z. z. Zákon o ochrane osobných údajov a o zmene a doplnení niektorých zákonov v platnom znení (ďalej len \"zákon\") so spracovaním osobných údajov môjho dieťaťa, v rozsahu meno, priezvisko, adresa bydliska a rodné číslo pre účely spracovania súvisiace s organizáciou detského letného tábora Bizón. Súhlas udeľujem do 31.12.2021. Po tomto termíne môžu byť tieto údaje použité v upravenej forme len na účely štatistiky a evidencie. Zároveň vyhlasujem, že som si vedomý svojich práv vyplývajúcich zo zákona. " 13
             , viewSubmitButton
             ]
-        , E.row
+        ]
+    ]
+
+
+viewFormSmall : Model -> Window -> List (E.Element Msg)
+viewFormSmall model { width } =
+    [ E.column [ E.width E.fill, E.spacingXY 0 20 ]
+        [ E.row
             [ E.width E.fill
             , E.height <| E.px 50
             ]
             []
+        , viewSectionTitle "ZAVAZNA REGISTRÁCIA" 32
+        , viewStringInput "Meno a priezvisko dieťaťa" model.childName ChildNameChanged [ E.centerX, F.size 13, E.width E.fill ]
+        , viewStringInput "Adresa bydliska" model.address AddressChanged [ E.centerX, F.size 13, E.width E.fill ]
+        , viewStringInput "Dátum narodenia" model.birthDate BirthDateChanged [ E.centerX, F.size 13, E.width E.fill ]
+        , viewStringInput "Meno a priezvisko zákonného zástupcu" model.adultName AdultNameChanged [ E.centerX, F.size 13, E.width E.fill ]
+        , viewStringInput "Telefónne číslo zákonného zástupcu" model.adultPhone AdultPhoneChanged [ E.centerX, F.size 13, E.width E.fill ]
+        , viewStringInput "E-mail zákonného zástupcu" model.adultEmail AdultEmailChanged [ E.centerX, F.size 13, E.width E.fill ]
+        , viewLongTextInput model.specialDiet [ E.centerX, F.size 13, E.width E.fill ]
+        , viewRadioInput model.tshirtSize [ E.centerX, F.size 13, E.width E.fill ]
+        , viewCheckbox model.submitted SubmittedChanged "Týmto záväzne prihlasujem svoje dieťa do detského letného tábora Bizón a zároveň čestne vyhlasujem, že v prípade, ak si moje dieťa vezme do tábora mobil, peňažnú hotovosť, šperky alebo iné cennosti, preberám plnú zodpovednosť v prípade ich straty alebo odcudzenia." 13
+        , viewCheckbox model.consented ConsentedChanged "Týmto dávam dobrovoľne vyslovený súhlas občianskemu združenie eRko - HKSD v zmysle zákona Zákon č. 18/2018 Z. z. Zákon o ochrane osobných údajov a o zmene a doplnení niektorých zákonov v platnom znení (ďalej len \"zákon\") so spracovaním osobných údajov môjho dieťaťa, v rozsahu meno, priezvisko, adresa bydliska a rodné číslo pre účely spracovania súvisiace s organizáciou detského letného tábora Bizón. Súhlas udeľujem do 31.12.2021. Po tomto termíne môžu byť tieto údaje použité v upravenej forme len na účely štatistiky a evidencie. Zároveň vyhlasujem, že som si vedomý svojich práv vyplývajúcich zo zákona. " 13
+        , viewSubmitButton
         ]
+    , E.row
+        [ E.width E.fill
+        , E.height <| E.px 50
+        ]
+        []
+    ]
