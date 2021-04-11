@@ -1,6 +1,12 @@
-module Ui exposing (color)
+module Ui exposing (Window, color)
 
 import Element as E
+
+
+type alias Window =
+    { width : Int
+    , height : Int
+    }
 
 
 color : { grey : E.Color, white : E.Color, purple : E.Color, pink : E.Color, black : E.Color, lightGrey : E.Color }

@@ -15,7 +15,7 @@ import Form
 import Home
 import Html exposing (Html, h1, img, nav, text)
 import Html.Attributes exposing (class, href, style)
-import Ui exposing (color)
+import Ui exposing (Window, color)
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser, s, string)
 
@@ -35,12 +35,6 @@ type alias Model =
     , window : Window
     , device : E.Device
     , navbarState : NavbarState
-    }
-
-
-type alias Window =
-    { width : Int
-    , height : Int
     }
 
 
@@ -204,7 +198,7 @@ view model =
         content =
             case model.page of
                 HomePage home ->
-                    Home.view home
+                    Home.view home model.window model.device
                         |> E.map GotHomeMessage
 
                 FormPage form ->

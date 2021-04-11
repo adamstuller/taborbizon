@@ -10,10 +10,10 @@ import Element.Input as I
 import Element.Lazy as L
 import Element.Region as R exposing (description)
 import Html exposing (Html, a, button, div, h1, h2, img, li, p, table, td, text, th, tr, ul)
-import Html.Attributes exposing (class, download, height, href, id, style)
+import Html.Attributes exposing (class, download, height, href, id, style, width)
 import Html.Events exposing (onClick)
 import List
-import Ui exposing (color)
+import Ui exposing (Window, color)
 
 
 type alias Animator =
@@ -30,7 +30,6 @@ type alias DocumentFile =
 
 type alias Model =
     { team : List Animator
-    , selectedTeam : List Animator
     , documents : List DocumentFile
     }
 
@@ -77,59 +76,131 @@ update msg model =
     in
     case msg of
         TeamShiftedLeft ->
-            ( { model | selectedTeam = List.take 5 shiftedTeamLeft, team = shiftedTeamLeft }, Cmd.none )
+            ( { model | team = shiftedTeamLeft }, Cmd.none )
 
         TeamShiftedRight ->
-            ( { model | selectedTeam = List.take 5 shiftedTeamRight, team = shiftedTeamRight }, Cmd.none )
+            ( { model | team = shiftedTeamRight }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
 
 
-viewIntro : E.Element Msg
-viewIntro =
+container : Int -> List (E.Element msg) -> E.Element msg
+container width =
+    let
+        containerWidth =
+            round <| 1200 / 2560 * toFloat width
+    in
+    E.column
+        [ E.centerX
+        , E.spacing 40
+        , E.width (E.px containerWidth)
+        ]
+
+
+containerSmall : List (E.Element msg) -> E.Element msg
+containerSmall =
+    E.column
+        [ E.centerX
+        , E.spacing 20
+        , E.htmlAttribute (style "max-width" "80%")
+        ]
+
+
+viewIntroBig : Window -> E.Element Msg
+viewIntroBig { height, width } =
+    let
+        titleFontSize =
+            round <| 150 / 2560 * toFloat width
+
+        subtitleFontSize =
+            round <| 75 / 2560 * toFloat width
+
+        linkFontSize =
+            round <| 40 / 2560 * toFloat width
+    in
     E.column
         [ E.width E.fill
-
-        -- , E.explain Debug.todo
         , E.padding 50
         , E.spacingXY 20 20
         , E.htmlAttribute (style "min-height" "calc(100vh)")
         , B.color color.purple
         , B.image <| Asset.filepath Asset.largeIntro
         ]
-        [ viewTitle, viewSubtitle, viewSubmitLinkIntro "PRIHLÁSIŤ" ]
+        [ viewTitleBig "TÁBOR BIZÓN - 2021" titleFontSize
+        , viewSubtitleBig "Putovanie za betlehemskou hviezdou" subtitleFontSize
+        , viewSubmitLinkIntroBig "PRIHLÁSIŤ" linkFontSize
+        ]
 
 
-viewTitle : E.Element Msg
-viewTitle =
+viewIntroSmall : E.Element Msg
+viewIntroSmall =
+    E.column
+        [ E.width E.fill
+        , E.htmlAttribute (style "min-height" "calc(80vh)")
+        , B.color color.purple
+        , E.spacingXY 0 30
+        ]
+        [ viewTitleSmall "TÁBOR BIZÓN" 30
+        , viewSubtitleSmall "Putovanie za betlehemskou hviezdou" 16
+        , viewSubmitLinkIntroSmall "PRIHLÁSIŤ" 16
+        ]
+
+
+viewTitleBig : String -> Int -> E.Element Msg
+viewTitleBig label fontSize =
     E.row
-        [ F.size 150
+        [ F.size fontSize
         , E.centerY
-        , E.paddingXY 0 10
+
+        -- , E.paddingXY 0 20
         , F.color color.white
         , F.bold
         ]
-        [ E.text "TÁBOR BIZÓN - 2021" ]
+        [ E.text label ]
 
 
-viewSubtitle : E.Element Msg
-viewSubtitle =
+viewTitleSmall : String -> Int -> E.Element Msg
+viewTitleSmall label fontSize =
     E.row
-        [ F.size 75
+        [ F.size fontSize
+        , E.centerX
+        , E.centerY
+        , F.bold
+        , F.color color.white
+        ]
+        [ E.text label ]
+
+
+viewSubtitleBig : String -> Int -> E.Element Msg
+viewSubtitleBig label fontSize =
+    E.row
+        [ F.size fontSize
         , E.centerY
         , E.paddingXY 0 20
         , F.color (E.rgb255 210 197 227)
         ]
-        [ E.text "Putovanie za betlehemskou hviezdou" ]
+        [ E.text label ]
 
 
-viewSubmitLinkIntro : String -> E.Element Msg
-viewSubmitLinkIntro label =
+viewSubtitleSmall : String -> Int -> E.Element Msg
+viewSubtitleSmall label fontSize =
+    E.row
+        [ F.size fontSize
+        , E.centerY
+        , E.centerX
+        , F.bold
+        , F.color color.pink
+        ]
+        [ E.text label ]
+
+
+viewSubmitLinkIntroBig : String -> Int -> E.Element Msg
+viewSubmitLinkIntroBig label fontSize =
     E.row
         [ E.centerY
         , E.padding 20
-        , F.size 40
+        , F.size fontSize
         , B.color (E.rgb255 250 105 128)
         , F.color (E.rgb255 255 255 255)
         , Bo.rounded 3
@@ -138,40 +209,70 @@ viewSubmitLinkIntro label =
         [ E.link [ E.mouseOver [ F.color (E.rgb255 255 255 255) ] ] { url = formUrl, label = E.text label } ]
 
 
-viewAboutUs : List Animator -> E.Element Msg
-viewAboutUs model =
-    E.column
-        [ E.centerX
-        , E.spacing 40
-        , E.htmlAttribute (id "about")
-        , E.width (E.px 1000)
+viewSubmitLinkIntroSmall : String -> Int -> E.Element Msg
+viewSubmitLinkIntroSmall label fontSize =
+    E.row
+        [ E.centerY
+        , E.centerX
+        , E.padding 20
+        , F.size fontSize
+        , B.color (E.rgb255 250 105 128)
+        , F.color (E.rgb255 255 255 255)
+        , Bo.rounded 3
+        , E.mouseOver [ B.color (E.rgb255 246 147 163) ]
         ]
-        [ viewSectionTitle "O NÁS"
-        , viewAboutUsText
+        [ E.link [ E.mouseOver [ F.color (E.rgb255 255 255 255) ] ] { url = formUrl, label = E.text label } ]
+
+
+viewAboutUsBig : List Animator -> Window -> E.Element Msg
+viewAboutUsBig model { width } =
+    container width <|
+        [ viewSectionTitle "O NÁS" width
+        , viewAboutUsText 20
         , viewAboutUsPhoto
-        , viewSubsectionTitle "Animatori"
-        , viewTeam model
+        , viewSubsectionTitle "Animatori" 40
+        , viewTeam model width
         ]
 
 
-viewSectionTitle : String -> E.Element Msg
-viewSectionTitle title =
-    E.row [ F.size 100, E.centerX ] [ E.text title ]
+viewAboutUsSmall : List Animator -> Window -> E.Element Msg
+viewAboutUsSmall team { width } =
+    containerSmall <|
+        [ viewSectionTitle "O NÁS" width
+        , viewAboutUsText 14
+        , viewAboutUsPhoto
+        , viewSubsectionTitle "Animatori" 24
+        , viewTeam team width
+        ]
 
 
-viewSubsectionTitle : String -> E.Element Msg
-viewSubsectionTitle subtitle =
-    E.row [ F.size 40, E.centerX ] [ E.text subtitle ]
+viewSectionTitle : String -> Int -> E.Element Msg
+viewSectionTitle title width =
+    let
+        sectionTitleFontSize =
+            max 32 <|
+                min 100 <|
+                    round <|
+                        100
+                            / 1680
+                            * toFloat width
+    in
+    E.row [ F.size sectionTitleFontSize, E.centerX ] [ E.text title ]
 
 
-viewAboutUsText : E.Element Msg
-viewAboutUsText =
+viewSubsectionTitle : String -> Int -> E.Element Msg
+viewSubsectionTitle subtitle fontSize =
+    E.row [ F.size fontSize, E.centerX ] [ E.text subtitle ]
+
+
+viewAboutUsText : Int -> E.Element Msg
+viewAboutUsText fontSize =
     let
         t =
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin enim nisl, sodales vitae purus vitae, porttitor sollicitudin massa. Morbi pharetra mi luctus, tincidunt enim at, placerat augue. Cras eu cursus diam. Nunc laoreet eros risus, at consectetur felis tempus a. Maecenas ipsum nunc, sollicitudin feugiat luctus sed, consectetur ac mauris. Nunc dictum fermentum sem at feugiat. Maecenas malesuada erat sed erat feugiat condimentum. Morbi sed neque at diam lobortis efficitur in sed nisi. Nunc commodo purus at neque placerat, sit amet hendrerit risus placerat. Donec bibendum quam a velit semper, nec porttitor lacus pharetra. Morbi malesuada metus at posuere bibendum. Donec id risus facilisis, feugiat nulla id, fermentum velit. Vestibulum id ultricies ex, et commodo mi. Ut aliquet iaculis dolor a sollicitudin. Aenean rhoncus facilisis augue, nec pharetra sapien iaculis vel. Nam rhoncus convallis dolor vel consectetur. "
     in
     E.row []
-        [ E.paragraph [ F.center ]
+        [ E.paragraph [ F.justify, F.size fontSize ]
             [ E.text t
             ]
         ]
@@ -200,8 +301,20 @@ viewAnimator l { name, image } =
                 ]
                 { src = Asset.filepath image, description = name }
             ]
-        , E.row [ E.centerX, F.size 16 ]
-            [ E.text name ]
+        , E.row
+            [ E.centerX
+            , E.width E.fill
+
+            -- , F.size 16
+            ]
+            [ E.el
+                [ E.centerX
+                , E.htmlAttribute
+                    (style "overflow-wrap" "break-word")
+                ]
+              <|
+                E.text name
+            ]
         ]
 
 
@@ -258,20 +371,26 @@ viewArrow len arrow align =
         ]
 
 
-viewTeam : List Animator -> E.Element Msg
-viewTeam animators =
+viewTeam : List Animator -> Int -> E.Element Msg
+viewTeam animators width =
     let
+        numSelected =
+            min 5 <| round <| 5 / 1680 * toFloat width
+
+        selectedTeam =
+            List.take numSelected animators
+
         l =
             List.length animators
 
         animatorList =
-            viewArrow l Asset.icons.arrowBack L :: List.map (viewAnimator l) animators ++ [ viewArrow l Asset.icons.arrowForth R ]
+            viewArrow l Asset.icons.arrowBack L :: List.map (viewAnimator l) selectedTeam ++ [ viewArrow l Asset.icons.arrowForth R ]
     in
     E.row [ E.spacing 10 ] animatorList
 
 
-viewDocuments : List DocumentFile -> E.Element Msg
-viewDocuments documents =
+viewDocumentsTable : List DocumentFile -> Int -> E.Element Msg
+viewDocumentsTable documents fontSize =
     let
         leftHeaderAttributes =
             [ F.color color.grey
@@ -290,44 +409,53 @@ viewDocuments documents =
             , F.alignRight
             ]
     in
-    E.column
-        [ E.centerX
-        , E.spacing 40
-        , E.width (E.px 1000)
-        ]
-        [ viewSectionTitle "DOKUMENTY"
-        , E.table
-            []
-            { data = documents
-            , columns =
-                [ { header = E.el leftHeaderAttributes (E.text "Dokument")
-                  , width = E.fillPortion 2
-                  , view = \{ name } -> E.el [ E.padding 10, F.light ] (E.text name)
-                  }
-                , { header = E.el rightHeaderAttributes (E.text "Akcie")
-                  , width = E.fillPortion 1
-                  , view =
-                        \{ file } ->
-                            E.download
-                                [ E.padding 10
-                                , F.alignRight
-                                , F.light
-                                ]
-                                { label = E.text "Stiahnuť"
-                                , url = Asset.filepath file
-                                }
-                  }
-                ]
-            }
+    E.table
+        [ F.size fontSize, E.width E.fill ]
+        { data = documents
+        , columns =
+            [ { header = E.el leftHeaderAttributes (E.text "Dokument")
+              , width = E.fillPortion 2
+              , view = \{ name } -> E.el [ E.padding 10, F.light ] (E.text name)
+              }
+            , { header = E.el rightHeaderAttributes (E.text "Akcie")
+              , width = E.fillPortion 1
+              , view =
+                    \{ file } ->
+                        E.download
+                            [ E.padding 10
+                            , F.alignRight
+                            , F.light
+                            ]
+                            { label = E.text "Stiahnuť"
+                            , url = Asset.filepath file
+                            }
+              }
+            ]
+        }
+
+
+viewDocumentsBig : List DocumentFile -> Window -> E.Element Msg
+viewDocumentsBig documents { width } =
+    container width <|
+        [ viewSectionTitle "DOKUMENTY" width
+        , viewDocumentsTable documents 20
         ]
 
 
-viewSubmitLinkHome : String -> E.Element Msg
-viewSubmitLinkHome label =
+viewDocumentsSmall : List DocumentFile -> Window -> E.Element Msg
+viewDocumentsSmall documents { width } =
+    containerSmall <|
+        [ viewSectionTitle "DOKUMENTY" width
+        , viewDocumentsTable documents 13
+        ]
+
+
+viewSubmitLinkHome : String -> Int -> E.Element Msg
+viewSubmitLinkHome label fontSize =
     E.row
         [ E.centerX
         , E.padding 20
-        , F.size 40
+        , F.size fontSize
         , B.color (E.rgb255 250 105 128)
         , F.color (E.rgb255 255 255 255)
         , Bo.rounded 3
@@ -336,83 +464,135 @@ viewSubmitLinkHome label =
         [ E.link [ E.mouseOver [ F.color (E.rgb255 255 255 255) ] ] { url = formUrl, label = E.text label } ]
 
 
-viewSubmitOption : E.Element Msg
-viewSubmitOption =
-    E.column
-        [ E.centerX
-        , E.spacing 40
-
-        -- , E.explain Debug.todo
-        , E.width (E.px 1000)
-        ]
-        [ viewSectionTitle "REGISTRÁCIA"
-        , viewSubmitLinkHome "TU"
-        ]
-
-
-viewContactLinks : E.Element Msg
-viewContactLinks =
+viewSubmitOption : Window -> E.Element Msg
+viewSubmitOption { width } =
     let
-        linkAttributes =
-            [ E.alignRight, E.padding 40 ]
-
-        linkImage imageSrc =
-            E.image [] { src = Asset.filepath imageSrc, description = "website" }
+        linkFontSize =
+            min 40 <| max 16 <| round <| 40 / 1680 * toFloat width
     in
-    E.row
-        [ E.spacingXY 0 0, E.width E.fill ]
-        [ E.el
-            [ F.alignLeft
-            , E.padding 40
-            , F.color color.grey
-            , F.size 40
+    container width <|
+        [ viewSectionTitle "REGISTRÁCIA" width
+        , viewSubmitLinkHome "TU" linkFontSize
+        ]
+
+
+viewContactLinks : Int -> E.Element Msg
+viewContactLinks width =
+    let
+        linksPadding =
+            min 40 <| max 10 <| round <| 40 / 1680 * toFloat width
+
+        iconsSize =
+            min 40 <| max 20 <| round <| 40 / 1680 * toFloat width
+
+        linkAttributes =
+            [ E.centerX, E.padding linksPadding ]
+
+        linkImage imageSrc description =
+            E.image [ E.height <| E.px iconsSize ] { src = Asset.filepath imageSrc, description = description }
+
+        emailFontSize =
+            min 40 <| max 20 <| round <| 40 / 1680 * toFloat width
+    in
+    E.column [ E.width E.fill ]
+        [ E.row
+            [ E.spacingXY 0 0
+            , E.width E.fill
+            , E.centerX
             ]
-            (E.text "tabor@bizon.sk")
-        , E.link linkAttributes { url = "/", label = linkImage Asset.icons.web }
-        , E.link linkAttributes { url = "https://www.facebook.com/taborbizon", label = linkImage Asset.icons.facebook }
-        , E.link linkAttributes { url = "https://www.instagram.com/taborbizon", label = linkImage Asset.icons.instagram }
+            [ E.el
+                [ F.center
+                , E.centerX
+                , E.padding 20
+                , F.color color.grey
+                , F.size emailFontSize
+                ]
+                (E.text "tabor@bizon.sk")
+            ]
+        , E.row
+            [ E.spacingXY 0 0
+            , E.width E.fill
+            , E.centerX
+            ]
+            [ E.link linkAttributes { url = "/", label = linkImage Asset.icons.web "web" }
+            , E.link linkAttributes { url = "https://www.facebook.com/taborbizon", label = linkImage Asset.icons.facebook "facebook" }
+            , E.link linkAttributes { url = "https://www.instagram.com/taborbizon", label = linkImage Asset.icons.instagram "instagram" }
+            ]
         ]
 
 
-viewContacts : E.Element Msg
-viewContacts =
-    E.column
-        [ E.centerX
-        , E.width (E.px 1000)
-        ]
-        [ viewSectionTitle "KONTAKTY", viewContactLinks ]
+viewContacts : Window -> E.Element Msg
+viewContacts { width } =
+    container width <|
+        [ viewSectionTitle "KONTAKTY" width, viewContactLinks width ]
 
 
-view : Model -> E.Element Msg
-view model =
+view : Model -> Window -> E.Device -> E.Element Msg
+view model window device =
+    let
+        viewIntro =
+            case device.class of
+                E.Phone ->
+                    viewIntroSmall
+
+                _ ->
+                    viewIntroBig window
+
+        viewAboutUs =
+            case device.class of
+                E.Phone ->
+                    viewAboutUsSmall model.team window
+
+                _ ->
+                    viewAboutUsBig model.team window
+
+        viewDocuments =
+            case device.class of
+                E.Phone ->
+                    viewDocumentsSmall model.documents window
+
+                _ ->
+                    viewDocumentsBig model.documents window
+
+        space =
+            case device.class of
+                E.Phone ->
+                    40
+
+                _ ->
+                    150
+    in
     E.column
         [ E.width E.fill
-        , E.spacing 150
-
-        -- , E.explain Debug.todo
+        , E.spacing space
         ]
+    <|
         [ viewIntro
-        , viewAboutUs model.selectedTeam
-        , viewDocuments model.documents
-        , viewSubmitOption
-        , viewContacts
+        , viewAboutUs
+        , viewDocuments
+        , viewSubmitOption window
         ]
+            ++ (if device.class /= E.Phone then
+                    [ viewContacts window ]
+
+                else
+                    []
+               )
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
     let
         team =
-            [ -- { name = "Monika Polcová", image = Asset.teamImages.monika }
-              { name = "Margareta Mašírová", image = Asset.teamImages.margareta }
-            , { name = "Jakob Jan Juhas", image = Asset.teamImages.jakob }
-            , { name = "Monika Polcova", image = Asset.teamImages.monika }
-            , { name = "Debora Laktisova", image = Asset.teamImages.debora }
-            , { name = "Sona Zimmermanova", image = Asset.teamImages.sona }
-            , { name = "Vratko Bartos", image = Asset.teamImages.vratko }
-            , { name = "Pravko Bartos", image = Asset.teamImages.pravko }
-            , { name = "Matus Petras", image = Asset.teamImages.matus }
-            , { name = "Simon Kopernicky", image = Asset.teamImages.simon }
+            [ { name = "Margi", image = Asset.teamImages.margareta }
+            , { name = "Jakob", image = Asset.teamImages.jakob }
+            , { name = "Monika", image = Asset.teamImages.monika }
+            , { name = "Debora", image = Asset.teamImages.debora }
+            , { name = "Sona", image = Asset.teamImages.sona }
+            , { name = "Vratko", image = Asset.teamImages.vratko }
+            , { name = "Pravko", image = Asset.teamImages.pravko }
+            , { name = "Matus", image = Asset.teamImages.matus }
+            , { name = "Simon", image = Asset.teamImages.simon }
             ]
     in
     ( { team = team
@@ -421,7 +601,6 @@ init _ =
             , { name = "Zdravotný dotazník", file = Asset.documentFiles.zdravotnyDotaznik }
             , { name = "Zdravotný dotazník", file = Asset.documentFiles.zdravotnyDotaznik }
             ]
-      , selectedTeam = List.take 5 team
       }
     , Cmd.none
     )
