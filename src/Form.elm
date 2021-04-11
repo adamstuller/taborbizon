@@ -124,28 +124,30 @@ viewDecorativeCol width =
         , B.color color.purple
         , Bo.widthEach { top = 10, bottom = 0, right = 0, left = 0 }
         , Bo.color color.white
+        , E.alignBottom
         ]
-        [ E.row [ E.width <| E.px columnWidth, E.height E.fill, E.spaceEvenly ]
+        [ E.row
+            [ E.width <| E.px columnWidth
+            , E.height E.fill
+            , E.alignBottom
+            ]
             [ E.image
-                [ E.height <| E.px 700
+                [ E.width <| E.fillPortion 1
                 , E.alignBottom
-                , E.paddingXY 30 0
                 ]
                 { src = Asset.filepath Asset.baltazar
                 , description = "Baltazar"
                 }
             , E.image
-                [ E.height <| E.px 700
+                [ E.width <| E.fillPortion 1
                 , E.alignBottom
-                , E.paddingXY 30 0
                 ]
                 { src = Asset.filepath Asset.gaspar
                 , description = "Gaspar"
                 }
             , E.image
-                [ E.height <| E.px 700
+                [ E.width <| E.fillPortion 1
                 , E.alignBottom
-                , E.paddingXY 30 0
                 ]
                 { src = Asset.filepath Asset.melichar
                 , description = "melichar"
@@ -192,8 +194,6 @@ view model window device =
             , E.height E.fill
             , E.spacingXY 0 20
             , E.htmlAttribute (style "min-height" "calc(100vh)")
-
-            -- , E.explain Debug.todo
             ]
             [ viewForm ]
             :: decorativeCol
@@ -228,7 +228,7 @@ viewLongTextInput value additionalAttributes =
         )
         { onChange = SpecialDietChanged
         , text = value
-        , placeholder = Nothing --Just <| I.placeholder [] <| E.text "Type your message"
+        , placeholder = Nothing
         , label = I.labelAbove [] <| E.text "Špeciálna strava / diéta"
         , spellcheck = True
         }
