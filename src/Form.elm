@@ -191,6 +191,7 @@ view model window device =
             [ E.width E.fill
             , E.height E.fill
             , E.spacingXY 0 20
+            , E.htmlAttribute (style "min-height" "calc(100vh)")
 
             -- , E.explain Debug.todo
             ]
