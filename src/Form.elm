@@ -124,8 +124,6 @@ viewDecorativeCol width =
         , B.color color.purple
         , Bo.widthEach { top = 10, bottom = 0, right = 0, left = 0 }
         , Bo.color color.white
-
-        -- , E.explain Debug.todo
         ]
         [ E.row [ E.width <| E.px columnWidth, E.height E.fill, E.spaceEvenly ]
             [ E.image
@@ -170,17 +168,6 @@ view model window device =
                 _ ->
                     []
 
-        rowHeight =
-            case device.class of
-                E.BigDesktop ->
-                    E.htmlAttribute (style "min-height" "calc(100vh)")
-
-                E.Desktop ->
-                    E.htmlAttribute (style "min-height" "calc(120vh)")
-
-                _ ->
-                    E.htmlAttribute (style "min-height" "calc(100vh)")
-
         viewForm =
             case device.class of
                 E.BigDesktop ->
@@ -197,7 +184,7 @@ view model window device =
     in
     E.row
         [ E.width E.fill
-        , rowHeight
+        , E.height E.fill
         ]
     <|
         E.column
@@ -343,6 +330,11 @@ viewFormBig model { width } =
             , viewSubmitButton
             ]
         ]
+    , E.row
+        [ E.width E.fill
+        , E.height <| E.px 80
+        ]
+        []
     ]
 
 
