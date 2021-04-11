@@ -202,7 +202,7 @@ view model =
                         |> E.map GotHomeMessage
 
                 FormPage form ->
-                    Form.view form
+                    Form.view form model.window model.device
                         |> E.map GotFormMessage
 
                 _ ->

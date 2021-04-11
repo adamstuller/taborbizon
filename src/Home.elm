@@ -13,7 +13,7 @@ import Html exposing (Html, a, button, div, h1, h2, img, li, p, table, td, text,
 import Html.Attributes exposing (class, download, height, href, id, style, width)
 import Html.Events exposing (onClick)
 import List
-import Ui exposing (Window, color)
+import Ui exposing (Window, color, container, containerSmall)
 
 
 type alias Animator =
@@ -83,28 +83,6 @@ update msg model =
 
         _ ->
             ( model, Cmd.none )
-
-
-container : Int -> List (E.Element msg) -> E.Element msg
-container width =
-    let
-        containerWidth =
-            round <| 1200 / 2560 * toFloat width
-    in
-    E.column
-        [ E.centerX
-        , E.spacing 40
-        , E.width (E.px containerWidth)
-        ]
-
-
-containerSmall : List (E.Element msg) -> E.Element msg
-containerSmall =
-    E.column
-        [ E.centerX
-        , E.spacing 20
-        , E.htmlAttribute (style "max-width" "80%")
-        ]
 
 
 viewIntroBig : Window -> E.Element Msg
@@ -201,10 +179,10 @@ viewSubmitLinkIntroBig label fontSize =
         [ E.centerY
         , E.padding 20
         , F.size fontSize
-        , B.color (E.rgb255 250 105 128)
-        , F.color (E.rgb255 255 255 255)
+        , B.color color.red
+        , F.color color.white
         , Bo.rounded 3
-        , E.mouseOver [ B.color (E.rgb255 246 147 163) ]
+        , E.mouseOver [ B.color color.lightRed ]
         ]
         [ E.link [ E.mouseOver [ F.color (E.rgb255 255 255 255) ] ] { url = formUrl, label = E.text label } ]
 
@@ -524,7 +502,9 @@ viewContactLinks width =
 viewContacts : Window -> E.Element Msg
 viewContacts { width } =
     container width <|
-        [ viewSectionTitle "KONTAKTY" width, viewContactLinks width ]
+        [ viewSectionTitle "KONTAKTY" width
+        , viewContactLinks width
+        ]
 
 
 view : Model -> Window -> E.Device -> E.Element Msg
@@ -573,10 +553,16 @@ view model window device =
         , viewSubmitOption window
         ]
             ++ (if device.class /= E.Phone then
-                    [ viewContacts window ]
+                    [ viewContacts window
+                    ]
 
                 else
-                    []
+                    [ E.row
+                        [ E.width E.fill
+                        , E.height <| E.px 50
+                        ]
+                        []
+                    ]
                )
 
 

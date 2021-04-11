@@ -12,7 +12,7 @@ import Element.Lazy as L
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
-import Ui exposing (color)
+import Ui exposing (Window, color, container, containerForm, containerSmall)
 
 
 
@@ -112,86 +112,124 @@ update msg model =
 -- VIEW
 
 
-view : Model -> E.Element Msg
-view model =
+viewDecorativeCol : Int -> E.Element Msg
+viewDecorativeCol width =
+    let
+        columnWidth =
+            round <| 1280 / 1706 * toFloat width / 2
+    in
+    E.column
+        [ E.width <| E.px columnWidth
+        , E.height E.fill
+        , B.color color.purple
+        , Bo.widthEach { top = 10, bottom = 0, right = 0, left = 0 }
+        , Bo.color color.white
+
+        -- , E.explain Debug.todo
+        ]
+        [ E.row [ E.width <| E.px columnWidth, E.height E.fill, E.spaceEvenly ]
+            [ E.image
+                [ E.height <| E.px 700
+                , E.alignBottom
+                , E.paddingXY 30 0
+                ]
+                { src = Asset.filepath Asset.baltazar
+                , description = "Baltazar"
+                }
+            , E.image
+                [ E.height <| E.px 700
+                , E.alignBottom
+                , E.paddingXY 30 0
+                ]
+                { src = Asset.filepath Asset.gaspar
+                , description = "Gaspar"
+                }
+            , E.image
+                [ E.height <| E.px 700
+                , E.alignBottom
+                , E.paddingXY 30 0
+                ]
+                { src = Asset.filepath Asset.melichar
+                , description = "melichar"
+                }
+            ]
+        ]
+
+
+view : Model -> Window -> E.Device -> E.Element Msg
+view model window device =
+    let
+        decorativeCol =
+            case device.class of
+                E.Desktop ->
+                    [ viewDecorativeCol window.width ]
+
+                E.BigDesktop ->
+                    [ viewDecorativeCol window.width ]
+
+                _ ->
+                    []
+
+        viewForm =
+            case device.class of
+                E.BigDesktop ->
+                    viewFormBig model window
+
+                E.Desktop ->
+                    viewFormBig model window
+
+                E.Tablet ->
+                    viewFormSmall model window
+
+                E.Phone ->
+                    viewFormSmall model window
+    in
     E.row
         [ E.width E.fill
         , E.htmlAttribute (style "min-height" "calc(120vh)")
+
+        -- , E.height <|
+        --     E.minimum window.height E.fill
         ]
-        [ E.column
-            [ E.width <| E.fillPortion 2
+    <|
+        E.column
+            [ E.width E.fill
             , E.height E.fill
+            , E.spacingXY 0 20
 
             -- , E.explain Debug.todo
             ]
-          <|
-            viewForm model
-        , E.column
-            [ E.width <| E.fillPortion 2
-            , E.height E.fill
-            , B.color color.purple
-            , Bo.widthEach { top = 10, bottom = 0, right = 0, left = 0 }
-            , Bo.color color.white
-            ]
-            [ E.row [ E.width E.fill, E.height E.fill, E.spaceEvenly ]
-                [ E.image
-                    [ E.height <| E.px 700
-                    , E.alignBottom
-                    , E.paddingXY 30 0
-                    ]
-                    { src = Asset.filepath Asset.baltazar
-                    , description = "Baltazar"
-                    }
-                , E.image
-                    [ E.height <| E.px 700
-                    , E.alignBottom
-                    , E.paddingXY 30 0
-                    ]
-                    { src = Asset.filepath Asset.gaspar
-                    , description = "Gaspar"
-                    }
-                , E.image
-                    [ E.height <| E.px 700
-                    , E.alignBottom
-                    , E.paddingXY 30 0
-                    ]
-                    { src = Asset.filepath Asset.melichar
-                    , description = "melichar"
-                    }
-                ]
-            ]
-        ]
+            [ viewForm ]
+            :: decorativeCol
 
 
-viewSectionTitle : String -> E.Element Msg
-viewSectionTitle title =
-    E.row [ F.size 60, E.centerX ] [ E.text title ]
+viewSectionTitle : String -> Int -> E.Element Msg
+viewSectionTitle title fontSize =
+    E.row [ F.size fontSize, E.centerX ] [ E.paragraph [ F.justify, F.center ] [ E.text title ] ]
 
 
-viewStringInput : String -> String -> (String -> Msg) -> E.Element Msg
-viewStringInput label value msg =
+viewStringInput : String -> String -> (String -> Msg) -> List (E.Attribute Msg) -> E.Element Msg
+viewStringInput label value msg additionalAttributes =
     I.text
-        [ E.width <| E.maximum 300 E.fill
-        , E.alignLeft
-        ]
+        ([ E.width E.fill ]
+            ++ additionalAttributes
+        )
         { onChange = msg
         , text = value
         , placeholder = Nothing --Just <| I.placeholder [] <| E.text "Type here"
-        , label = I.labelAbove [] <| E.text label
+        , label = I.labelAbove [] <| E.paragraph [ F.justify ] [ E.text label ]
         }
 
 
-viewLongTextInput : String -> E.Element Msg
-viewLongTextInput value =
+viewLongTextInput : String -> List (E.Attribute Msg) -> E.Element Msg
+viewLongTextInput value additionalAttributes =
     I.multiline
-        [ E.width <| E.maximum 300 E.fill
-        , E.height <| E.px 150
-        , E.alignRight
-        , Bo.rounded 6
-
-        -- , Bo.width 2
-        -- , Bo.color <| E.rgb255 0x72 0x9F 0xCF
-        ]
+        ([ E.width E.fill
+         , E.height <| E.px 100
+         , Bo.rounded 6
+         ]
+            ++ additionalAttributes
+        )
         { onChange = SpecialDietChanged
         , text = value
         , placeholder = Nothing --Just <| I.placeholder [] <| E.text "Type your message"
@@ -200,92 +238,132 @@ viewLongTextInput value =
         }
 
 
-viewForm : Model -> List (E.Element Msg)
-viewForm model =
-    [ E.row
-        [ E.width E.fill
-        , E.height <| E.fillPortion 3
-        ]
-        [ viewSectionTitle "ZAVAZNA REGISTRÁCIA" ]
-    , E.row
-        [ E.width <| E.maximum 700 E.fill
-        , E.height <| E.fillPortion 6
-        , F.size 13
-        , E.centerX
-
-        -- , E.explain Debug.todo
-        ]
-        [ E.column
-            [ E.width <| E.fillPortion 2
-            , E.height <| E.fillPortion 2
-            , E.spaceEvenly
-            , E.alignLeft
+viewRadioInput : String -> List (E.Attribute Msg) -> E.Element Msg
+viewRadioInput tshirtSize additionalAttributes =
+    E.el ([] ++ additionalAttributes) <|
+        I.radio
+            [ E.padding 10
+            , E.spacing 10
             ]
-            [ viewStringInput "Meno a priezvisko dieťaťa" model.childName ChildNameChanged
-            , viewStringInput "Adresa bydliska" model.address AddressChanged
-            , viewStringInput "Dátum narodenia" model.birthDate BirthDateChanged
-            , viewStringInput "Meno a priezvisko zákonného zástupcu" model.adultName AdultNameChanged
-            , viewStringInput "Telefónne číslo zákonného zástupcu" model.adultPhone AdultPhoneChanged
-            , viewStringInput "E-mail zákonného zástupcu" model.adultEmail AdultEmailChanged
-            ]
-        , E.column
-            [ E.width <| E.fillPortion 2
-            , E.height <| E.fillPortion 2
-            , E.spaceEvenly
-
-            -- , E.explain Debug.todo
-            ]
-            [ viewLongTextInput model.specialDiet
-            , E.el [ E.alignRight, E.width <| E.maximum 300 E.fill ] <|
-                I.radio
-                    [ E.padding 10
-                    , E.spacing 10
-                    ]
-                    { onChange = TshirtSizeChanged
-                    , selected = Just model.tshirtSize
-                    , label = I.labelAbove [] <| E.text "Veľkosť trička pre dieťa"
-                    , options =
-                        [ I.option "detské XS (5-6 rokov 110/116)" <| E.text "detské XS (5-6 rokov 110/116)"
-                        , I.option "detské S (7-8 rokov 122/128)" <| E.text "detské S (7-8 rokov 122/128)"
-                        , I.option "detské M (9-10 rokov 134/140)" <| E.text "detské M (9-10 rokov 134/140)"
-                        , I.option "detské L (11-12 rokov 146/152)" <| E.text "detské L (11-12 rokov 146/152)"
-                        , I.option "detské XL (12-13 rokov 158/164)" <| E.text "detské XL (12-13 rokov 158/164)"
-                        , I.option "dospelé XS" <| E.text "dospelé XS"
-                        , I.option "dospelé S" <| E.text "dospelé SV"
-                        , I.option "dospelé M" <| E.text "dospelé M"
-                        , I.option "dospelé L" <| E.text "dospelé L"
-                        , I.option "dospelé XL" <| E.text "dospelé XL"
-                        , I.option "dospelé XXL" <| E.text "dospelé XXL"
-                        ]
-                    }
-            ]
-        ]
-    , E.row
-        [ E.width <| E.maximum 700 E.fill
-        , E.height <| E.fillPortion 5
-        , E.centerX
-        ]
-        [ E.column [ E.width E.fill, E.spacing 20 ]
-            [ I.checkbox [ F.size 13 ]
-                { onChange = SubmittedChanged
-                , icon = I.defaultCheckbox
-                , checked = model.submitted
-                , label = I.labelAbove [] <| E.paragraph [] [ E.text "Týmto záväzne prihlasujem svoje dieťa do detského letného tábora Bizón a zároveň čestne vyhlasujem, že v prípade, ak si moje dieťa vezme do tábora mobil, peňažnú hotovosť, šperky alebo iné cennosti, preberám plnú zodpovednosť v prípade ich straty alebo odcudzenia." ]
-                }
-            , I.checkbox [ F.size 13 ]
-                { onChange = ConsentedChanged
-                , icon = I.defaultCheckbox
-                , checked = model.consented
-                , label = I.labelAbove [] <| E.paragraph [] [ E.text "Týmto dávam dobrovoľne vyslovený súhlas občianskemu združenie eRko - HKSD v zmysle zákona Zákon č. 18/2018 Z. z. Zákon o ochrane osobných údajov a o zmene a doplnení niektorých zákonov v platnom znení (ďalej len \"zákon\") so spracovaním osobných údajov môjho dieťaťa, v rozsahu meno, priezvisko, adresa bydliska a rodné číslo pre účely spracovania súvisiace s organizáciou detského letného tábora Bizón. Súhlas udeľujem do 31.12.2021. Po tomto termíne môžu byť tieto údaje použité v upravenej forme len na účely štatistiky a evidencie. Zároveň vyhlasujem, že som si vedomý svojich práv vyplývajúcich zo zákona. " ]
-                }
-            , I.button
-                [ E.padding 15
-                , B.color (E.rgb255 250 105 128)
-                , F.color (E.rgb255 255 255 255)
-                , Bo.rounded 3
-                , E.mouseOver [ B.color (E.rgb255 246 147 163) ]
+            { onChange = TshirtSizeChanged
+            , selected = Just tshirtSize
+            , label = I.labelAbove [] <| E.text "Veľkosť trička pre dieťa"
+            , options =
+                [ I.option "detské XS (5-6 rokov 110/116)" <| E.paragraph [ F.justify ] [ E.text "detské XS (5-6 rokov 110/116)" ]
+                , I.option "detské S (7-8 rokov 122/128)" <| E.paragraph [ F.justify ] [ E.text "detské S (7-8 rokov 122/128)" ]
+                , I.option "detské M (9-10 rokov 134/140)" <| E.paragraph [ F.justify ] [ E.text "detské M (9-10 rokov 134/140)" ]
+                , I.option "detské L (11-12 rokov 146/152)" <| E.paragraph [ F.justify ] [ E.text "detské L (11-12 rokov 146/152)" ]
+                , I.option "detské XL (12-13 rokov 158/164)" <| E.paragraph [ F.justify ] [ E.text "detské XL (12-13 rokov 158/164)" ]
+                , I.option "dospelé XS" <| E.paragraph [ F.justify ] [ E.text "dospelé XS" ]
+                , I.option "dospelé S" <| E.paragraph [ F.justify ] [ E.text "dospelé SV" ]
+                , I.option "dospelé M" <| E.paragraph [ F.justify ] [ E.text "dospelé M" ]
+                , I.option "dospelé L" <| E.paragraph [ F.justify ] [ E.text "dospelé L" ]
+                , I.option "dospelé XL" <| E.paragraph [ F.justify ] [ E.text "dospelé XL" ]
+                , I.option "dospelé XXL" <| E.paragraph [ F.justify ] [ E.text "dospelé XXL" ]
                 ]
-                { onPress = Just FormSubmitted, label = E.text "Odoslať" }
+            }
+
+
+viewCheckbox : Bool -> (Bool -> Msg) -> String -> Int -> E.Element Msg
+viewCheckbox value msg label fontSize =
+    I.checkbox [ E.width E.fill ]
+        { onChange = msg
+        , icon = I.defaultCheckbox
+        , checked = value
+        , label = I.labelAbove [] <| E.paragraph [ F.justify, F.size fontSize ] [ E.text label ]
+        }
+
+
+viewSubmitButton : E.Element Msg
+viewSubmitButton =
+    I.button
+        [ E.padding 15
+        , B.color color.red
+        , F.color color.white
+        , Bo.rounded 3
+        , E.mouseOver [ B.color color.lightRed ]
+        ]
+        { onPress = Just FormSubmitted, label = E.text "Odoslať" }
+
+
+viewFormBig : Model -> Window -> E.Element Msg
+viewFormBig model { width } =
+    containerForm <|
+        [ E.row
+            [ E.width E.fill
+            , E.height <| E.px 80
+            ]
+            []
+        , viewSectionTitle "ZAVAZNA REGISTRÁCIA" 60
+        , E.row
+            [ E.width E.fill
+            , F.size 13
+            , E.centerX
+            , E.height E.fill
+            , E.spacingXY 20 0
+            ]
+            [ E.column
+                [ E.width <| E.fillPortion 2
+                , E.alignLeft
+                , E.spacingXY 0 20
+                , E.height E.fill
+                ]
+                [ viewStringInput "Meno a priezvisko dieťaťa" model.childName ChildNameChanged [ E.alignLeft, E.width E.fill ]
+                , viewStringInput "Adresa bydliska" model.address AddressChanged [ E.alignLeft, E.width E.fill ]
+                , viewStringInput "Dátum narodenia" model.birthDate BirthDateChanged [ E.alignLeft, E.width E.fill ]
+                , viewStringInput "Meno a priezvisko zákonného zástupcu" model.adultName AdultNameChanged [ E.alignLeft, E.width E.fill ]
+                , viewStringInput "Telefónne číslo zákonného zástupcu" model.adultPhone AdultPhoneChanged [ E.alignLeft, E.width E.fill ]
+                , viewStringInput "E-mail zákonného zástupcu" model.adultEmail AdultEmailChanged [ E.alignLeft, E.width E.fill ]
+                ]
+            , E.column
+                [ E.width <| E.fillPortion 2
+                , E.spacingXY 0 20
+                , E.alignTop
+                , E.alignRight
+                ]
+                [ viewLongTextInput model.specialDiet [ E.alignRight, E.width E.fill ]
+                , viewRadioInput model.tshirtSize [ E.alignRight, E.width E.fill ]
+                ]
+            ]
+        , E.row
+            [ E.width E.fill
+            , E.centerX
+            , E.height E.fill
+            ]
+            [ E.column [ E.width E.fill, E.spacing 20, E.height E.fill ]
+                [ viewCheckbox model.submitted SubmittedChanged "Týmto záväzne prihlasujem svoje dieťa do detského letného tábora Bizón a zároveň čestne vyhlasujem, že v prípade, ak si moje dieťa vezme do tábora mobil, peňažnú hotovosť, šperky alebo iné cennosti, preberám plnú zodpovednosť v prípade ich straty alebo odcudzenia." 13
+                , viewCheckbox model.consented ConsentedChanged "Týmto dávam dobrovoľne vyslovený súhlas občianskemu združenie eRko - HKSD v zmysle zákona Zákon č. 18/2018 Z. z. Zákon o ochrane osobných údajov a o zmene a doplnení niektorých zákonov v platnom znení (ďalej len \"zákon\") so spracovaním osobných údajov môjho dieťaťa, v rozsahu meno, priezvisko, adresa bydliska a rodné číslo pre účely spracovania súvisiace s organizáciou detského letného tábora Bizón. Súhlas udeľujem do 31.12.2021. Po tomto termíne môžu byť tieto údaje použité v upravenej forme len na účely štatistiky a evidencie. Zároveň vyhlasujem, že som si vedomý svojich práv vyplývajúcich zo zákona. " 13
+                , viewSubmitButton
+                ]
             ]
         ]
-    ]
+
+
+viewFormSmall : Model -> Window -> E.Element Msg
+viewFormSmall model { width } =
+    containerSmall <|
+        [ E.column [ E.width E.fill, E.spacingXY 0 20 ]
+            [ E.row
+                [ E.width E.fill
+                , E.height <| E.px 50
+                ]
+                []
+            , viewSectionTitle "ZAVAZNA REGISTRÁCIA" 32
+            , viewStringInput "Meno a priezvisko dieťaťa" model.childName ChildNameChanged [ E.centerX, F.size 13, E.width E.fill ]
+            , viewStringInput "Adresa bydliska" model.address AddressChanged [ E.centerX, F.size 13, E.width E.fill ]
+            , viewStringInput "Dátum narodenia" model.birthDate BirthDateChanged [ E.centerX, F.size 13, E.width E.fill ]
+            , viewStringInput "Meno a priezvisko zákonného zástupcu" model.adultName AdultNameChanged [ E.centerX, F.size 13, E.width E.fill ]
+            , viewStringInput "Telefónne číslo zákonného zástupcu" model.adultPhone AdultPhoneChanged [ E.centerX, F.size 13, E.width E.fill ]
+            , viewStringInput "E-mail zákonného zástupcu" model.adultEmail AdultEmailChanged [ E.centerX, F.size 13, E.width E.fill ]
+            , viewLongTextInput model.specialDiet [ E.centerX, F.size 13, E.width E.fill ]
+            , viewRadioInput model.tshirtSize [ E.centerX, F.size 13, E.width E.fill ]
+            , viewCheckbox model.submitted SubmittedChanged "Týmto záväzne prihlasujem svoje dieťa do detského letného tábora Bizón a zároveň čestne vyhlasujem, že v prípade, ak si moje dieťa vezme do tábora mobil, peňažnú hotovosť, šperky alebo iné cennosti, preberám plnú zodpovednosť v prípade ich straty alebo odcudzenia." 13
+            , viewCheckbox model.consented ConsentedChanged "Týmto dávam dobrovoľne vyslovený súhlas občianskemu združenie eRko - HKSD v zmysle zákona Zákon č. 18/2018 Z. z. Zákon o ochrane osobných údajov a o zmene a doplnení niektorých zákonov v platnom znení (ďalej len \"zákon\") so spracovaním osobných údajov môjho dieťaťa, v rozsahu meno, priezvisko, adresa bydliska a rodné číslo pre účely spracovania súvisiace s organizáciou detského letného tábora Bizón. Súhlas udeľujem do 31.12.2021. Po tomto termíne môžu byť tieto údaje použité v upravenej forme len na účely štatistiky a evidencie. Zároveň vyhlasujem, že som si vedomý svojich práv vyplývajúcich zo zákona. " 13
+            , viewSubmitButton
+            ]
+        , E.row
+            [ E.width E.fill
+            , E.height <| E.px 50
+            ]
+            []
+        ]
