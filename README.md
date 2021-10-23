@@ -14,5 +14,5 @@ SPA for summer camp bison in Elm, for school purposes as well
 `npm run serve`
 
 ## TODO:
-- [] Gallery page
-- [] POST requests to excel sheet
+- [ ] Gallery page
+- [ ] POST requests to excel sheet
