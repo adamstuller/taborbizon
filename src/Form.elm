@@ -22,6 +22,8 @@ import Ui exposing (Window, color, container, containerFormBigDesktop, container
 -- MODEL
 
 
+type ValidationResult value error = Ok value | Err value error
+
 type alias Model =
     { childName : String
     , address : String
@@ -206,15 +208,24 @@ viewSectionTitle title fontSize =
 
 viewStringInput : String -> String -> (String -> Msg) -> List (E.Attribute Msg) -> E.Element Msg
 viewStringInput label value msg additionalAttributes =
-    I.text
-        ([ E.width E.fill ]
-            ++ additionalAttributes
-        )
-        { onChange = msg
-        , text = value
-        , placeholder = Nothing --Just <| I.placeholder [] <| E.text "Type here"
-        , label = I.labelAbove [] <| E.paragraph [ F.justify ] [ E.text label ]
-        }
+    E.column [ E.width E.fill ]
+        [ I.text
+            ([ E.width E.fill, Bo.color color.red ]
+                ++ additionalAttributes
+            )
+            { onChange = msg
+            , text = value
+            , placeholder = Nothing --Just <| I.placeholder [] <| E.text "Type here"
+            , label = I.labelAbove [] <| E.paragraph [ F.justify ] [ E.text label ]
+            }
+        , E.el
+            [ F.color color.red
+            -- , E.explain Debug.todo
+            , E.paddingXY 0 5
+            ]
+          <|
+            E.text "Problem"
+        ]
 
 
 viewLongTextInput : String -> List (E.Attribute Msg) -> E.Element Msg
