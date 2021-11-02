@@ -352,9 +352,9 @@ main : Program Window Model Msg
 main =
     Browser.application
         { init = init
+        , update = update
+        , view = view
         , onUrlRequest = ClickedLink
         , onUrlChange = ChangedUrl
         , subscriptions = subscriptions
-        , update = update
-        , view = view
         }
