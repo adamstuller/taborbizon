@@ -1,7 +1,8 @@
-module Form exposing (Model, Msg, init, update, view)
+module Form exposing (initPage)
 
 import Asset
 import Browser
+import Browser.Events exposing (onResize)
 import Element as E
 import Element.Background as B
 import Element.Border as Bo
@@ -9,9 +10,12 @@ import Element.Events as Ev
 import Element.Font as F
 import Element.Input as I
 import Element.Lazy as L
+import Flags exposing (flagsDecoder)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
+import Json.Decode exposing (decodeValue)
+import Page exposing (PageWidget, Route)
 import Ui exposing (Window, color, container, containerFormBigDesktop, containerFormDesktop, containerFormPhone, containerFormTablet, containerSmall)
 
 
@@ -33,11 +37,22 @@ type alias Model =
     , specialDiet : String
     , submitted : Bool
     , consented : Bool
+    , window : Window
+    , device : E.Device
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init () =
+init : Json.Decode.Value -> ( Model, Cmd Msg )
+init flags =
+    let
+        window =
+            case decodeValue flagsDecoder flags of
+                Ok decodedWindow ->
+                    decodedWindow
+
+                Err _ ->
+                    { width = 700, height = 100 }
+    in
     ( { childName = ""
       , address = ""
       , birthDate = ""
@@ -48,6 +63,8 @@ init () =
       , specialDiet = ""
       , submitted = False
       , consented = False
+      , window = window
+      , device = E.classifyDevice window
       }
     , Cmd.none
     )
@@ -69,6 +86,7 @@ type Msg
     | SubmittedChanged Bool
     | ConsentedChanged Bool
     | FormSubmitted
+    | WindowSizeChanged Window
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -106,6 +124,9 @@ update msg model =
 
         FormSubmitted ->
             ( model, Cmd.none )
+
+        WindowSizeChanged window ->
+            ( { model | window = window, device = E.classifyDevice window }, Cmd.none )
 
 
 
@@ -156,33 +177,33 @@ viewDecorativeCol width =
         ]
 
 
-view : Model -> Window -> E.Device -> E.Element Msg
-view model window device =
+view : Model -> E.Element Msg
+view model =
     let
         decorativeCol =
-            case device.class of
+            case model.device.class of
                 E.Desktop ->
-                    [ viewDecorativeCol window.width ]
+                    [ viewDecorativeCol model.window.width ]
 
                 E.BigDesktop ->
-                    [ viewDecorativeCol window.width ]
+                    [ viewDecorativeCol model.window.width ]
 
                 _ ->
                     []
 
         viewForm =
-            case device.class of
+            case model.device.class of
                 E.BigDesktop ->
-                    containerFormBigDesktop <| viewFormBig model window
+                    containerFormBigDesktop <| viewFormBig model model.window
 
                 E.Desktop ->
-                    containerFormDesktop <| viewFormBig model window
+                    containerFormDesktop <| viewFormBig model model.window
 
                 E.Tablet ->
-                    containerFormTablet <| viewFormSmall model window
+                    containerFormTablet <| viewFormSmall model model.window
 
                 E.Phone ->
-                    containerFormPhone <| viewFormSmall model window
+                    containerFormPhone <| viewFormSmall model model.window
     in
     E.row
         [ E.width E.fill
@@ -366,3 +387,23 @@ viewFormSmall model { width } =
         ]
         []
     ]
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    onResize <|
+        \width height ->
+            WindowSizeChanged { width = width, height = height }
+
+
+initPage : Route -> PageWidget Model Msg Json.Decode.Value
+initPage route =
+    let
+        htmlView model =
+            E.layout [] <| view model
+    in
+    { init = ( init, route )
+    , update = update
+    , subscriptions = subscriptions
+    , view = htmlView
+    }

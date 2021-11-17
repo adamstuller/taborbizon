@@ -1,4 +1,4 @@
-module Home exposing (Model, Msg, init, update, view)
+module Home exposing (initPage)
 
 import Asset
 import Element as E
@@ -14,6 +14,12 @@ import Html.Attributes exposing (class, download, height, href, id, style, width
 import Html.Events exposing (onClick)
 import List
 import Ui exposing (Window, color, container, containerSmall)
+import Page exposing (PageWidget)
+import Flags exposing (Flags)
+import Json.Decode exposing (decodeValue)
+import Flags exposing (flagsDecoder)
+import Page exposing (Route)
+import Browser.Events exposing (onResize)
 
 
 type alias Animator =
@@ -31,6 +37,8 @@ type alias DocumentFile =
 type alias Model =
     { team : List Animator
     , documents : List DocumentFile
+    , window : Window
+    , device: E.Device
     }
 
 
@@ -38,6 +46,8 @@ type Msg
     = NothingYet
     | TeamShiftedRight
     | TeamShiftedLeft
+    | WindowSizeChanged Window
+
 
 
 formUrl : String
@@ -80,6 +90,9 @@ update msg model =
 
         TeamShiftedRight ->
             ( { model | team = shiftedTeamRight }, Cmd.none )
+
+        WindowSizeChanged window ->
+            ( { model | window = window, device = E.classifyDevice window }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -507,35 +520,35 @@ viewContacts { width } =
         ]
 
 
-view : Model -> Window -> E.Device -> E.Element Msg
-view model window device =
+view : Model -> E.Element Msg
+view model =
     let
         viewIntro =
-            case device.class of
+            case model.device.class of
                 E.Phone ->
                     viewIntroSmall
 
                 _ ->
-                    viewIntroBig window
+                    viewIntroBig model.window
 
         viewAboutUs =
-            case device.class of
+            case model.device.class of
                 E.Phone ->
-                    viewAboutUsSmall model.team window
+                    viewAboutUsSmall model.team model.window
 
                 _ ->
-                    viewAboutUsBig model.team window
+                    viewAboutUsBig model.team model.window
 
         viewDocuments =
-            case device.class of
+            case model.device.class of
                 E.Phone ->
-                    viewDocumentsSmall model.documents window
+                    viewDocumentsSmall model.documents model.window
 
                 _ ->
-                    viewDocumentsBig model.documents window
+                    viewDocumentsBig model.documents model.window
 
         space =
-            case device.class of
+            case model.device.class of
                 E.Phone ->
                     40
 
@@ -550,10 +563,10 @@ view model window device =
         [ viewIntro
         , viewAboutUs
         , viewDocuments
-        , viewSubmitOption window
+        , viewSubmitOption model.window
         ]
-            ++ (if device.class /= E.Phone then
-                    [ viewContacts window
+            ++ (if model.device.class /= E.Phone then
+                    [ viewContacts model.window
                     ]
 
                 else
@@ -566,8 +579,8 @@ view model window device =
                )
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
+init : Flags -> ( Model, Cmd Msg )
+init flags =
     let
         team =
             [ { name = "Margi", image = Asset.teamImages.margareta }
@@ -580,6 +593,13 @@ init _ =
             , { name = "Matus", image = Asset.teamImages.matus }
             , { name = "Simon", image = Asset.teamImages.simon }
             ]
+        window =
+            case decodeValue flagsDecoder flags of
+                Ok decodedWindow ->
+                    decodedWindow
+
+                Err _ ->
+                    { width = 700, height = 100 }
     in
     ( { team = team
       , documents =
@@ -587,6 +607,27 @@ init _ =
             , { name = "Zdravotný dotazník", file = Asset.documentFiles.zdravotnyDotaznik }
             , { name = "Zdravotný dotazník", file = Asset.documentFiles.zdravotnyDotaznik }
             ]
+        , window = window
+        , device = E.classifyDevice window
       }
     , Cmd.none
     )
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    onResize <|
+        \width height ->
+            WindowSizeChanged { width = width, height = height }
+
+initPage : Route -> PageWidget Model Msg Flags
+initPage route = 
+    let
+        htmlView model =
+            E.layout [] <| view model
+    in
+    {
+        init = (init, route)
+        , update = update
+        , subscriptions = subscriptions
+        , view = htmlView
+    }
