@@ -16,7 +16,3 @@ main =
         |> flip Page.add (Form.initPage "/form")
         |> Router.initRouter "Tábor bizón" viewNavbar
         |> Browser.application
-
-
-
--- technicka dokumentacia - kazda stranka sa stara sama
