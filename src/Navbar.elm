@@ -1,19 +1,21 @@
 module Navbar exposing (..)
 
-import Element as E
-import Element.Background as B
-import Element.Border as Bo
-import Element.Font as F
 import Asset exposing (Asset)
 import Browser exposing (Document)
 import Browser.Events exposing (onResize)
+import Element as E
+import Element.Background as B
+import Element.Border as Bo
+import Element.Events as Ev
+import Element.Font as F
 import Html exposing (Html, h1, img, nav, text)
 import Html.Attributes exposing (class, href, style)
+import Router exposing (Navbar, NavbarState)
 import Ui exposing (Window, color)
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser, s, string)
-import Router exposing (Navbar)
-import Router exposing (NavbarState)
+
+
 logo : E.Attribute msg -> E.Element msg
 logo align =
     E.el
@@ -60,8 +62,8 @@ viewNavbarBig _ =
         ]
 
 
-viewNavbarSmall : NavbarState -> E.Element msg
-viewNavbarSmall state =
+viewNavbarSmall : NavbarState -> msg -> E.Element msg
+viewNavbarSmall state onNavbarExpandClicked =
     let
         link { label, url } =
             E.link
@@ -74,7 +76,7 @@ viewNavbarSmall state =
                 ([ E.alignLeft
                  , E.centerY
                  , E.paddingXY 20 20
-                --  , Ev.onMouseDown <| NavbarExpandClicked True
+                 , Ev.onMouseDown <| onNavbarExpandClicked
                  ]
                     ++ expandedMenuPlaced
                 )
@@ -123,7 +125,7 @@ viewNavbarSmall state =
                 , E.column
                     [ E.width <| E.fillPortion 1 -- TODO: Scaling
                     , E.htmlAttribute (style "min-height" "calc(100vh)")
-                    -- , Ev.onClick <| NavbarExpandClicked False
+                    , Ev.onClick <| onNavbarExpandClicked
                     ]
                     []
                 ]
@@ -151,14 +153,23 @@ viewNavbarSmall state =
         [ logo E.centerX
         ]
 
-viewNavbar : Navbar
-viewNavbar routes state url =
-    let
-        device = E.classifyDevice state.window
-    in
-    E.layout [] <| case device.class of
-        E.Phone ->
-            viewNavbarSmall state 
 
-        _ ->
-            viewNavbarBig state
+viewNavbar : Navbar msg
+viewNavbar routes state onNavbarExpandClicked url =
+    let
+    
+        device =
+            E.classifyDevice state.window
+    in
+    Html.div
+        [ style "position" "fixed"
+        , style "top" "0"
+        ]
+        [ E.layout [] <|
+            case device.class of
+                E.Phone ->
+                    viewNavbarSmall state onNavbarExpandClicked
+
+                _ ->
+                    viewNavbarBig state
+        ]
