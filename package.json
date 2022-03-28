@@ -6,7 +6,7 @@
   "scripts": {
     "watch": "chokidar '**/*.elm' -c 'elm make src/Main.elm --output build/app.js' --initial",
     "dev": "http-server-spa ./build",
-    "build": "elm make src/Main.elm --output build/app.js"
+    "build": "elm make src/Main.elm --optimize --output build/app.js"
   },
   "dependencies": {
     "elm": "^0.19.1-5"
