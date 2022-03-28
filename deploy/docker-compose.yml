@@ -1,0 +1,10 @@
+version: '3'
+
+services: 
+
+  taborbizon: 
+    build: ../
+    container_name: taborbizon
+    ports: 
+      - "80:80"
+    

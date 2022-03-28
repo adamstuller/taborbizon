@@ -11,7 +11,7 @@ SPA for summer camp bison in Elm, for school purposes as well
 `npm run watch`
 
 3. Run server
-`npm run serve`
+`npm run dev`
 
 ## TODO:
 - [ ] Gallery page
