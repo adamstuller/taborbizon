@@ -51,4 +51,5 @@ Temporary Items
 # End of https://www.toptal.com/developers/gitignore/api/macos,visualstudiocode,elm
 app.js
 build/app.js
+deploy/app
 node_modules
