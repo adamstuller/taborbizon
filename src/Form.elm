@@ -1,5 +1,6 @@
 module Form exposing (initPage)
 
+import Alt exposing (PageWidget, Params, RouteParser)
 import Asset
 import Browser
 import Browser.Events exposing (onResize)
@@ -15,7 +16,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import Json.Decode exposing (decodeValue)
-import Page exposing (PageWidget, Route)
 import Ui exposing (Window, color, container, containerFormBigDesktop, containerFormDesktop, containerFormPhone, containerFormTablet, containerSmall)
 
 
@@ -42,11 +42,11 @@ type alias Model =
     }
 
 
-init : Json.Decode.Value -> ( Model, Cmd Msg )
-init flags =
+init : Params -> ( Model, Cmd Msg )
+init params =
     let
         window =
-            case decodeValue flagsDecoder flags of
+            case decodeValue flagsDecoder params.flags of
                 Ok decodedWindow ->
                     decodedWindow
 
@@ -396,13 +396,13 @@ subscriptions model =
             WindowSizeChanged { width = width, height = height }
 
 
-initPage : Route -> PageWidget Model Msg Json.Decode.Value
-initPage route =
+initPage : RouteParser -> PageWidget Model Msg Params
+initPage p =
     let
         htmlView model =
             E.layout [] <| view model
     in
-    { init = ( init, route )
+    { init = ( init, p )
     , update = update
     , subscriptions = subscriptions
     , view = htmlView

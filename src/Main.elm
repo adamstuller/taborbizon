@@ -1,16 +1,18 @@
 module Main exposing (main)
 
+import Alt exposing (basicParser, emptyFooter, initRouter, join, topParser)
 import Browser
 import Form
 import Home
-import Navbar exposing (viewNavbar)
-import Page
-import Router
-import Flip exposing (flip)
+import Navbar exposing (viewHeader)
 
 
 main =
-    Home.initPage "/"
-        |> Page.join (Form.initPage "/form")
-        |> Router.initRouter "Tábor bizón" viewNavbar
+    let
+        title =
+            "Tábor bizón"
+    in
+    Home.initPage topParser
+        |> join (Form.initPage <| basicParser "form")
+        |> initRouter title viewHeader emptyFooter
         |> Browser.application

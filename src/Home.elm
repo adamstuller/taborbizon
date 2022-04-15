@@ -1,25 +1,23 @@
 module Home exposing (initPage)
 
 import Asset
+import Browser.Events exposing (onResize)
 import Element as E
 import Element.Background as B
 import Element.Border as Bo
 import Element.Events as Ev
 import Element.Font as F
-import Element.Input as I
 import Element.Lazy as L
 import Element.Region as R exposing (description)
-import Html exposing (Html, a, button, div, h1, h2, img, li, p, table, td, text, th, tr, ul)
+import Html exposing (Html, a, button, div, h1, h2, li, p, table, td, text, th, tr, ul)
 import Html.Attributes exposing (class, download, height, href, id, style, width)
 import Html.Events exposing (onClick)
-import List
-import Ui exposing (Window, color, container, containerSmall)
-import Page exposing (PageWidget)
-import Flags exposing (Flags)
 import Json.Decode exposing (decodeValue)
+import List
+import Alt exposing (PageWidget, RouteParser)
+import Ui exposing (Window, color, container, containerSmall)
+import Alt exposing (Params)
 import Flags exposing (flagsDecoder)
-import Page exposing (Route)
-import Browser.Events exposing (onResize)
 
 
 type alias Animator =
@@ -38,7 +36,7 @@ type alias Model =
     { team : List Animator
     , documents : List DocumentFile
     , window : Window
-    , device: E.Device
+    , device : E.Device
     }
 
 
@@ -47,7 +45,6 @@ type Msg
     | TeamShiftedRight
     | TeamShiftedLeft
     | WindowSizeChanged Window
-
 
 
 formUrl : String
@@ -579,8 +576,8 @@ view model =
                )
 
 
-init : Flags -> ( Model, Cmd Msg )
-init flags =
+init : Params -> ( Model, Cmd Msg )
+init params =
     let
         team =
             [ { name = "Margi", image = Asset.teamImages.margareta }
@@ -593,8 +590,9 @@ init flags =
             , { name = "Matus", image = Asset.teamImages.matus }
             , { name = "Simon", image = Asset.teamImages.simon }
             ]
+
         window =
-            case decodeValue flagsDecoder flags of
+            case decodeValue flagsDecoder params.flags of
                 Ok decodedWindow ->
                     decodedWindow
 
@@ -607,11 +605,12 @@ init flags =
             , { name = "Zdravotný dotazník", file = Asset.documentFiles.zdravotnyDotaznik }
             , { name = "Zdravotný dotazník", file = Asset.documentFiles.zdravotnyDotaznik }
             ]
-        , window = window
-        , device = E.classifyDevice window
+      , window = window
+      , device = E.classifyDevice window
       }
     , Cmd.none
     )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -619,15 +618,15 @@ subscriptions model =
         \width height ->
             WindowSizeChanged { width = width, height = height }
 
-initPage : Route -> PageWidget Model Msg Flags
-initPage route = 
+
+initPage : RouteParser -> PageWidget Model Msg Params
+initPage p =
     let
         htmlView model =
             E.layout [] <| view model
     in
-    {
-        init = (init, route)
-        , update = update
-        , subscriptions = subscriptions
-        , view = htmlView
+    { init = ( init, p )
+    , update = update
+    , subscriptions = subscriptions
+    , view = htmlView
     }
