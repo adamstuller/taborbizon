@@ -1,10 +1,10 @@
 module Main exposing (main)
 
-import Alt exposing (basicParser, emptyFooter, initRouter, join, topParser)
+import Alt exposing (basicParser, initRouter, join, topParser)
 import Browser
 import Form
 import Home
-import Navbar exposing (viewHeader)
+import Navbar exposing (viewHeader, viewFooter)
 
 
 main =
@@ -14,5 +14,5 @@ main =
     in
     Home.initPage topParser
         |> join (Form.initPage <| basicParser "form")
-        |> initRouter title viewHeader emptyFooter
+        |> initRouter title viewHeader viewFooter
         |> Browser.application

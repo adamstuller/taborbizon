@@ -1,7 +1,8 @@
 module Navbar exposing (..)
 
-import Alt exposing (Header)
+import Alt exposing (Footer, Header)
 import Asset exposing (Asset)
+import Bootstrap.Carousel exposing (Msg)
 import Element as E
 import Html exposing (Html, a, div, h1, img, nav, text)
 import Html.Attributes exposing (alt, class, href, src, style)
@@ -32,3 +33,10 @@ viewHeader state onNavbarExpandClicked url =
         [ logo
         , links
         ]
+
+
+viewFooter : Footer msg
+viewFooter =
+    Html.div
+        []
+        [ text "rewrite" ]
