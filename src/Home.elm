@@ -1,5 +1,6 @@
 module Home exposing (initPage)
 
+import Alt exposing (PageWidget, Params, RouteParser)
 import Asset
 import Browser.Events exposing (onResize)
 import Element as E
@@ -9,15 +10,13 @@ import Element.Events as Ev
 import Element.Font as F
 import Element.Lazy as L
 import Element.Region as R exposing (description)
+import Flags exposing (flagsDecoder)
 import Html exposing (Html, a, button, div, h1, h2, li, p, table, td, text, th, tr, ul)
 import Html.Attributes exposing (class, download, height, href, id, style, width)
 import Html.Events exposing (onClick)
 import Json.Decode exposing (decodeValue)
 import List
-import Alt exposing (PageWidget, RouteParser)
 import Ui exposing (Window, color, container, containerSmall)
-import Alt exposing (Params)
-import Flags exposing (flagsDecoder)
 
 
 type alias Animator =
@@ -115,7 +114,7 @@ viewIntroBig { height, width } =
         , B.color color.purple
         , B.image <| Asset.filepath Asset.largeIntro
         ]
-        [ viewTitleBig "TÁBOR BIZÓN - 2021" titleFontSize
+        [ viewTitleBig "TÁBOR BIZÓN - 2022" titleFontSize
         , viewSubtitleBig "Putovanie za betlehemskou hviezdou" subtitleFontSize
         , viewSubmitLinkIntroBig "PRIHLÁSIŤ" linkFontSize
         ]
