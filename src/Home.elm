@@ -256,7 +256,7 @@ viewAboutUsText : Int -> E.Element Msg
 viewAboutUsText fontSize =
     let
         t =
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin enim nisl, sodales vitae purus vitae, porttitor sollicitudin massa. Morbi pharetra mi luctus, tincidunt enim at, placerat augue. Cras eu cursus diam. Nunc laoreet eros risus, at consectetur felis tempus a. Maecenas ipsum nunc, sollicitudin feugiat luctus sed, consectetur ac mauris. Nunc dictum fermentum sem at feugiat. Maecenas malesuada erat sed erat feugiat condimentum. Morbi sed neque at diam lobortis efficitur in sed nisi. Nunc commodo purus at neque placerat, sit amet hendrerit risus placerat. Donec bibendum quam a velit semper, nec porttitor lacus pharetra. Morbi malesuada metus at posuere bibendum. Donec id risus facilisis, feugiat nulla id, fermentum velit. Vestibulum id ultricies ex, et commodo mi. Ut aliquet iaculis dolor a sollicitudin. Aenean rhoncus facilisis augue, nec pharetra sapien iaculis vel. Nam rhoncus convallis dolor vel consectetur. "
+            "Sme skupina mladých dobrovoľníkov, ktorí robia tento tábor s radosťou. Chodili sme sem už ako deti od kedy si pamätáme a bol to ten najlepší čas v roku! Teraz chceme davať z toho, čo sme dostali a chceme aby si tento tábor užilo každé jedno dieťa! "
     in
     E.row []
         [ E.paragraph [ F.justify, F.size fontSize ]
